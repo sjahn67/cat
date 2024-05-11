@@ -55,7 +55,7 @@ m.getCurrentValue = function () {
     const curTime = getCurTime();
     let curValue = 0;
     data.forEach(item => {
-        if (item.time < curTime) {
+        if (item.time <= curTime) {
             curValue = item.value;
         } else {
             return;
