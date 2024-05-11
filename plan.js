@@ -9,9 +9,14 @@ const data = [
     { time: 100000, value: 60 },
     { time: 103000, value: 80 },
     { time: 110000, value: 100 },
-    { time: 150000, value: 70 },
-    { time: 160000, value: 60 },
+    { time: 150000, value: 80 },
+    { time: 153000, value: 75 },
+    { time: 160000, value: 70 },
+    { time: 163000, value: 65 },
+    { time: 170000, value: 60 },
+    { time: 173000, value: 55 },
     { time: 180000, value: 40 },
+    { time: 183000, value: 35 },
     { time: 190000, value: 30 },
     { time: 230000, value: 10 }
 ];
