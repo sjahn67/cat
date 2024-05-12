@@ -18,7 +18,15 @@ const data = [
     { time: 180000, value: 40 },
     { time: 183000, value: 35 },
     { time: 190000, value: 30 },
-    { time: 230000, value: 10 }
+    { time: 193000, value: 25 },
+    { time: 200000, value: 20 },
+    { time: 203000, value: 18 },
+    { time: 210000, value: 16 },
+    { time: 213000, value: 14 },
+    { time: 220000, value: 12 },
+    { time: 223000, value: 10 },
+    { time: 230000, value: 8 },
+    { time: 233000, value: 5 }
 ];
 
 function getCurTime() {
