@@ -3,7 +3,7 @@ const Gpio = require("pigpio").Gpio;
 const CHANGE_INTERVAL = 10; // msec
 
 const  MAX_FREQUENCE = 125000000;
-const  CUR_FREQUENCE = 120000;
+const  CUR_FREQUENCE = 1000;
 const  MAX_DUTYCYCLE = 1000000;
 
 class ledClass {
@@ -17,9 +17,10 @@ class ledClass {
     this.#CurrentDutyCyle = 0;
     setInterval(() => {
       if (this.#TargetDutyCycle == this.#CurrentDutyCyle) return;
-      const delta = (this.#TargetDutyCycle > this.#CurrentDutyCyle) ? 100 : -100;
+      const delta = (this.#TargetDutyCycle > this.#CurrentDutyCyle) ? 10 : -10;
       this.#CurrentDutyCyle += delta;
       // this.#led.pwmWrite(this.#CurrentDutyCyle);
+      // console.log(this.#CurrentDutyCyle);
       this.#led.hardwarePwmWrite(CUR_FREQUENCE, this.#CurrentDutyCyle);
     }, CHANGE_INTERVAL);
   }
