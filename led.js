@@ -21,7 +21,6 @@ class ledClass {
       this.#CurrentDutyCyle += delta;
       // this.#led.pwmWrite(this.#CurrentDutyCyle);
       this.#led.hardwarePwmWrite(CUR_FREQUENCE, this.#CurrentDutyCyle);
-      console.log(this.#CurrentDutyCyle);
     }, CHANGE_INTERVAL);
   }
 
