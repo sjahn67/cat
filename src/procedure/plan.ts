@@ -3,7 +3,7 @@ import { DB_DIR_PATH } from "../constants";
 import { join } from "path";
 import * as fs from "fs";
 
-const DEFAULT_SCHEDULE_DATA_PATH = join(__dirname, "schedule-data-default.json");
+const DEFAULT_SCHEDULE_DATA_PATH = join(__dirname, "../database", "schedule-data-default.json");
 const SCHEDULE_DATA_PATH = join(DB_DIR_PATH, "schedule-data.json");
 
 let data: object[] = null;

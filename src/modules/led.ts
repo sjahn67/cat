@@ -11,7 +11,7 @@ export class ledClass {
 
   constructor(gpioNumber: number, frequence: number) {
     this.led = new Gpio(gpioNumber, { mode: Gpio.OUTPUT });
-    this.TargetDutyCycle = this.CurrentDutyCyle = this.led.getPwmDutyCycle();
+    this.TargetDutyCycle = this.CurrentDutyCyle = 0
     this.pValue = this.CurrentDutyCyle * 100 / Cat.ProgramConfig.led.maxDutyCycle;
     console.log("Init pValue: ", this.pValue);
 
