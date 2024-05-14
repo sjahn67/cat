@@ -19,8 +19,6 @@ try {
     }
     console.log("error:", err);
 }
-console.log(data);
-
 
 function getCurTime(): number {
     let date_time = new Date();
