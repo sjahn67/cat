@@ -1,2 +1,2 @@
 # cat
-Aquarium led brightness and co2 actuator control program.
+Aquarium Led brightness and Co2 actuator control program by Raspi.
