@@ -1,0 +1,42 @@
+{
+  "compilerOptions": {
+    "baseUrl": "./",
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "noImplicitAny": false,
+    "removeComments": true,
+    "preserveConstEnums": true,
+    "outDir": "dist",
+    "sourceMap": false,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "target": "es6",
+    "lib": [
+      "ES6",
+      "DOM"
+    ],
+    "plugins": [
+      {
+        "transform": "typescript-transform-paths"
+      },
+      {
+        "transform": "typescript-transform-paths",
+        "afterDeclarations": true
+      }
+    ],
+    "paths": {
+      "@cat/*": [
+        "./*"
+      ]
+    }
+  },
+  "include": [
+    "./src/"
+  ],
+  "exclude": [
+    "./node_modules",
+    "./dist",
+    "./src/tests"
+  ],
+  "typeRoots": ["./node_modules/@types", "./src/@types"]  
+}
