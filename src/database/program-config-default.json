@@ -1,0 +1,15 @@
+{
+  "version": 0,
+  "name": "Seongjin's Cat",
+  "led": {
+    "gpioNumber": 12,
+    "maxFrequence": 125000000,
+    "curFrequence": 1000,
+    "maxDutyCycle": 1000000,
+    "dutyCycleStep": 1000,
+    "changeInterval": 10
+  },
+  "co2": {
+    "gpioNumber": 16
+  }
+}
