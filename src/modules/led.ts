@@ -1,7 +1,7 @@
 import { Cat } from "../globals";
 import { NODE_ENV, NodeEnvTypes } from "../constants";
 const Gpio = (NODE_ENV === NodeEnvTypes.NODE_ENV_DEV) ? require("pigpio-mock").Gpio : require("pigpio").Gpio;
-
+// import { Gpio } from "pigpio";
 export class ledClass {
   private led;
   private TargetDutyCycle: number;
@@ -11,9 +11,9 @@ export class ledClass {
 
   constructor(gpioNumber: number, frequence: number) {
     this.led = new Gpio(gpioNumber, { mode: Gpio.OUTPUT });
-    this.TargetDutyCycle = 0;
-    this.CurrentDutyCyle = 0;
-    this.pValue = 0;
+    this.TargetDutyCycle = this.CurrentDutyCyle = this.led.getPwmDutyCycle();
+    this.pValue = this.CurrentDutyCyle * 100 / Cat.ProgramConfig.led.maxDutyCycle;
+    console.log("Init pValue: ", this.pValue);
 
     if (frequence < 0) this.Frequence = 0;
     else if (Cat.ProgramConfig.led.maxFrequence < frequence) this.Frequence = Cat.ProgramConfig.led.maxFrequence;

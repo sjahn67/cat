@@ -14,9 +14,11 @@ export class relayClass {
     public setRelay(value: boolean) {
         let setValue: number = RelayModes.MODE_0;
         if (value) setValue = RelayModes.MODE_1;
-        else setValue = RelayModes.MODE_0;
-        this.relay.digitalWrite(setValue);
-        this.curValue = this.relay.digitalRead();
+
+        if (this.curValue !== setValue) {
+            this.relay.digitalWrite(setValue);
+            this.curValue = this.relay.digitalRead();
+        }
     }
 
     public getValue(): boolean {
