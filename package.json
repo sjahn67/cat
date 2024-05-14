@@ -11,6 +11,13 @@
   "dependencies": {
     "node-schedule": "^2.1.1",
     "pigpio": "^3.3.1",
-    "pigpio-mock":"^0.0.1"
+    "pigpio-mock": "^0.0.1",
+    "winston": "^2.4.5",
+    "winston-daily-rotate-file": "^1.7.2"
+  },
+  "devDependencies": {
+    "@types/node": "^20.12.11",
+    "@types/node-schedule": "^2.1.7",
+    "typescript": "^5.3.3"
   }
 }
