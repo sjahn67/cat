@@ -13,7 +13,6 @@ export class ledClass {
     this.led = new Gpio(gpioNumber, { mode: Gpio.OUTPUT });
     this.TargetDutyCycle = this.CurrentDutyCyle = 0
     this.pValue = this.CurrentDutyCyle * 100 / Cat.ProgramConfig.led.maxDutyCycle;
-    console.log("Init pValue: ", this.pValue);
 
     if (frequence < 0) this.Frequence = 0;
     else if (Cat.ProgramConfig.led.maxFrequence < frequence) this.Frequence = Cat.ProgramConfig.led.maxFrequence;
@@ -21,10 +20,12 @@ export class ledClass {
 
     setInterval(() => {
       if (this.TargetDutyCycle == this.CurrentDutyCyle) return;
-      const delta = (this.TargetDutyCycle > this.CurrentDutyCyle) ? Cat.ProgramConfig.led.dutyCycleStep : -Cat.ProgramConfig.led.dutyCycleStep;
+      let delta = this.TargetDutyCycle - this.CurrentDutyCyle;
+      if (Math.abs(delta) > Cat.ProgramConfig.led.dutyCycleStep) {
+        delta = (delta > 0) ? Cat.ProgramConfig.led.dutyCycleStep : - Cat.ProgramConfig.led.dutyCycleStep;
+      }
       this.CurrentDutyCyle += delta;
-      // this.#led.pwmWrite(this.#CurrentDutyCyle);
-      // console.log(this.#CurrentDutyCyle);
+      // console.log(`${this.CurrentDutyCyle} -> ${this.TargetDutyCycle} delta:${delta}`);
       this.led.hardwarePwmWrite(this.Frequence, this.CurrentDutyCyle);
     }, Cat.ProgramConfig.led.changeInterval);
   }
@@ -37,6 +38,7 @@ export class ledClass {
       this.pValue = 0;
     }
     this.TargetDutyCycle = Math.round(this.pValue / 100 * Cat.ProgramConfig.led.maxDutyCycle);
+    // console.log("pValue:", this.pValue, "this.TargetDutyCycle: ", this.TargetDutyCycle);
   }
 
   public getValue(): number {
