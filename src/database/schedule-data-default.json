@@ -6,6 +6,11 @@
       "co2": false
     },
     {
+      "time": "0800",
+      "ledValue": 0,
+      "co2": false
+    },
+    {
       "time": "0900",
       "ledValue": 15,
       "co2": false
