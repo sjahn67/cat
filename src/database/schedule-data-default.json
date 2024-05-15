@@ -1,134 +1,169 @@
 {
     "table": [
-        {
-            "time": "000000",
-            "ledValue": 0,
-            "co2": false
-        },
-        {
-            "time": "080000",
-            "ledValue": 10,
-            "co2": false
-        },
-        {
-            "time": "083000",
-            "ledValue": 20,
-            "co2": false
-        },
-        {
-            "time": "090000",
-            "ledValue": 30,
-            "co2": false
-        },
-        {
-            "time": "093000",
-            "ledValue": 40,
-            "co2": false
-        },
-        {
-            "time": "100000",
-            "ledValue": 60,
-            "co2": false
-        },
-        {
-            "time": "103000",
-            "ledValue": 80,
-            "co2": false
-        },
-        {
-            "time": "110000",
-            "ledValue": 100,
-            "co2": true
-        },
-        {
-            "time": "150000",
-            "ledValue": 80,
-            "co2": false
-        },
-        {
-            "time": "153000",
-            "ledValue": 75,
-            "co2": false
-        },
-        {
-            "time": "160000",
-            "ledValue": 70,
-            "co2": false
-        },
-        {
-            "time": "163000",
-            "ledValue": 65,
-            "co2": false
-        },
-        {
-            "time": "170000",
-            "ledValue": 60,
-            "co2": false
-        },
-        {
-            "time": "173000",
-            "ledValue": 55,
-            "co2": false
-        },
-        {
-            "time": "180000",
-            "ledValue": 40,
-            "co2": false
-        },
-        {
-            "time": "183000",
-            "ledValue": 35,
-            "co2": false
-        },
-        {
-            "time": "190000",
-            "ledValue": 30,
-            "co2": false
-        },
-        {
-            "time": "193000",
-            "ledValue": 25,
-            "co2": false
-        },
-        {
-            "time": "200000",
-            "ledValue": 20,
-            "co2": false
-        },
-        {
-            "time": "203000",
-            "ledValue": 18,
-            "co2": false
-        },
-        {
-            "time": "210000",
-            "ledValue": 16,
-            "co2": false
-        },
-        {
-            "time": "213000",
-            "ledValue": 14,
-            "co2": false
-        },
-        {
-            "time": "220000",
-            "ledValue": 12,
-            "co2": false
-        },
-        {
-            "time": "223000",
-            "ledValue": 10,
-            "co2": false
-        },
-        {
-            "time": "230000",
-            "ledValue": 8,
-            "co2": false
-        },
-        {
-            "time": "233000",
-            "ledValue": 5,
-            "co2": false
-        }
+      {
+        "time": "000000",
+        "ledValue": 0,
+        "co2": false
+      },
+      {
+        "time": "080000",
+        "ledValue": 5,
+        "co2": false
+      },
+      {
+        "time": "083000",
+        "ledValue": 10,
+        "co2": false
+      },
+      {
+        "time": "090000",
+        "ledValue": 15,
+        "co2": false
+      },
+      {
+        "time": "093000",
+        "ledValue": 20,
+        "co2": false
+      },
+      {
+        "time": "100000",
+        "ledValue": 25,
+        "co2": false
+      },
+      {
+        "time": "103000",
+        "ledValue": 30,
+        "co2": false
+      },
+      {
+        "time": "110000",
+        "ledValue": 35,
+        "co2": false
+      },
+      {
+        "time": "113000",
+        "ledValue": 40,
+        "co2": true
+      },
+      {
+        "time": "120000",
+        "ledValue": 50,
+        "co2": false
+      },
+      {
+        "time": "123000",
+        "ledValue": 60,
+        "co2": false
+      },
+      {
+        "time": "130000",
+        "ledValue": 70,
+        "co2": true
+      },
+      {
+        "time": "133000",
+        "ledValue": 80,
+        "co2": true
+      },
+      {
+        "time": "140000",
+        "ledValue": 90,
+        "co2": true
+      },
+      {
+        "time": "143000",
+        "ledValue": 100,
+        "co2": true
+      },
+      {
+        "time": "150000",
+        "ledValue": 100,
+        "co2": true
+      },
+      {
+        "time": "153000",
+        "ledValue": 90,
+        "co2": true
+      },
+      {
+        "time": "160000",
+        "ledValue": 80,
+        "co2": true
+      },
+      {
+        "time": "163000",
+        "ledValue": 70,
+        "co2": false
+      },
+      {
+        "time": "170000",
+        "ledValue": 60,
+        "co2": false
+      },
+      {
+        "time": "173000",
+        "ledValue": 55,
+        "co2": false
+      },
+      {
+        "time": "180000",
+        "ledValue": 40,
+        "co2": false
+      },
+      {
+        "time": "183000",
+        "ledValue": 35,
+        "co2": false
+      },
+      {
+        "time": "190000",
+        "ledValue": 30,
+        "co2": false
+      },
+      {
+        "time": "193000",
+        "ledValue": 25,
+        "co2": false
+      },
+      {
+        "time": "200000",
+        "ledValue": 20,
+        "co2": false
+      },
+      {
+        "time": "203000",
+        "ledValue": 18,
+        "co2": false
+      },
+      {
+        "time": "210000",
+        "ledValue": 16,
+        "co2": false
+      },
+      {
+        "time": "213000",
+        "ledValue": 14,
+        "co2": false
+      },
+      {
+        "time": "220000",
+        "ledValue": 12,
+        "co2": false
+      },
+      {
+        "time": "223000",
+        "ledValue": 10,
+        "co2": false
+      },
+      {
+        "time": "230000",
+        "ledValue": 8,
+        "co2": false
+      },
+      {
+        "time": "233000",
+        "ledValue": 5,
+        "co2": false
+      }
     ]
-}
+  }
