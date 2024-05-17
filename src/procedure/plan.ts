@@ -43,6 +43,7 @@ export class planManager {
             if (sData !== null) {
                 const mStart: number = this.getMinTime(sData.time);
                 const mEnd: number = this.getMinTime(item.time);
+                item.ledDelta = 0; // init current data.
                 sData.ledDelta = (item.ledValue - sData.ledValue) / (mEnd - mStart);
                 console.log(`sData:${sData}`);
                 sData = item;
@@ -94,7 +95,7 @@ export class planManager {
 
     public getCurrentValue(): IValueInfo {
         const curTime = this.getCurTime();
-        let curValue: IDataInfo;
+        let curValue: IDataInfo = null;
         this.data.forEach(item => {
             if (Number(item.time) <= curTime) {
                 curValue = item;
@@ -102,9 +103,14 @@ export class planManager {
                 return;
             }
         })
-        const ret: IValueInfo = {
-            ledValue: curValue.ledValue + (this.getMinTime(curTime) - this.getMinTime(curValue.time)) * curValue.ledDelta,
-            co2: curValue.co2
+        let ret: IValueInfo = null;
+        if (curValue !== null) {
+            ret = {
+                ledValue: curValue.ledValue + (this.getMinTime(curTime) - this.getMinTime(curValue.time)) * curValue.ledDelta,
+                co2: curValue.co2
+            }
+        } else {
+            ret = { ledValue: 0, co2: false }
         }
 
         return ret;
