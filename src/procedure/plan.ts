@@ -45,7 +45,6 @@ export class planManager {
                 const mEnd: number = this.getMinTime(item.time);
                 item.ledDelta = 0; // init current data.
                 sData.ledDelta = (item.ledValue - sData.ledValue) / (mEnd - mStart);
-                console.log(`sData:${sData}`);
                 sData = item;
             } else {
                 sData = item;
