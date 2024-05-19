@@ -1,68 +1,53 @@
 {
   "table": [
     {
-      "time": "0000",
-      "ledValue": 0,
-      "co2": false
-    },
-    {
       "time": "0800",
       "ledValue": 0,
       "co2": false
     },
     {
       "time": "0900",
-      "ledValue": 15,
-      "co2": false
-    },
-    {
-      "time": "1000",
-      "ledValue": 25,
+      "ledValue": 20,
       "co2": false
     },
     {
       "time": "1100",
-      "ledValue": 35,
+      "ledValue": 20,
       "co2": false
+    },
+    {
+      "time": "1130",
+      "ledValue": 60,
+      "co2": true
     },
     {
       "time": "1200",
-      "ledValue": 50,
-      "co2": false
-    },
-    {
-      "time": "1300",
-      "ledValue": 70,
-      "co2": true
-    },
-    {
-      "time": "1400",
-      "ledValue": 90,
-      "co2": true
-    },
-    {
-      "time": "1500",
       "ledValue": 100,
       "co2": true
     },
     {
-      "time": "1600",
-      "ledValue": 80,
+      "time": "1300",
+      "ledValue": 100,
       "co2": true
     },
     {
+      "time": "1400",
+      "ledValue": 100,
+      "co2": true
+    },
+    {
+      "time": "1430",
+      "ledValue": 100,
+      "co2": false
+    },
+    {
+      "time": "1500",
+      "ledValue": 100,
+      "co2": false
+    },
+    {
       "time": "1700",
-      "ledValue": 60,
-      "co2": false
-    },
-    {
-      "time": "1800",
-      "ledValue": 40,
-      "co2": false
-    },
-    {
-      "time": "1900",
-      "ledValue": 30,
+      "ledValue": 20,
       "co2": false
     },
     {
@@ -71,22 +56,12 @@
       "co2": false
     },
     {
-      "time": "2100",
-      "ledValue": 16,
-      "co2": false
-    },
-    {
-      "time": "2200",
-      "ledValue": 12,
-      "co2": false
-    },
-    {
       "time": "2300",
-      "ledValue": 8,
+      "ledValue": 10,
       "co2": false
     },
     {
-      "time": "2400",
+      "time": "2330",
       "ledValue": 0,
       "co2": false
     }
