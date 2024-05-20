@@ -8,40 +8,20 @@
     {
       "time": "0900",
       "ledValue": 20,
-      "co2": false
-    },
-    {
-      "time": "1100",
-      "ledValue": 20,
-      "co2": false
-    },
-    {
-      "time": "1130",
-      "ledValue": 60,
       "co2": true
     },
     {
-      "time": "1200",
+      "time": "0930",
       "ledValue": 100,
       "co2": true
     },
     {
-      "time": "1300",
-      "ledValue": 100,
-      "co2": true
-    },
-    {
-      "time": "1400",
-      "ledValue": 100,
-      "co2": true
-    },
-    {
-      "time": "1430",
+      "time": "1600",
       "ledValue": 100,
       "co2": false
     },
     {
-      "time": "1500",
+      "time": "1630",
       "ledValue": 100,
       "co2": false
     },
@@ -51,17 +31,12 @@
       "co2": false
     },
     {
-      "time": "2000",
-      "ledValue": 20,
-      "co2": false
-    },
-    {
-      "time": "2300",
+      "time": "2230",
       "ledValue": 10,
       "co2": false
     },
     {
-      "time": "2330",
+      "time": "2300",
       "ledValue": 0,
       "co2": false
     }

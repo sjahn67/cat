@@ -12,8 +12,8 @@ export class relayClass {
     }
 
     public setRelay(value: boolean) {
-        let setValue: number = RelayModes.MODE_0;
-        if (value) setValue = RelayModes.MODE_1;
+        let setValue: number = RelayModes.MODE_1;
+        if (value) setValue = RelayModes.MODE_0;
 
         if (this.curValue !== setValue) {
             this.relay.digitalWrite(setValue);
@@ -22,6 +22,6 @@ export class relayClass {
     }
 
     public getValue(): boolean {
-        return (this.curValue === RelayModes.MODE_1);
+        return (this.curValue === RelayModes.MODE_0);
     }
 }
