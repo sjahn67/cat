@@ -1,5 +1,6 @@
 import { Cat } from "../globals";
-import { NODE_ENV, NodeEnvTypes, RelayModes } from "../constants";
+import { NODE_ENV, NodeEnvTypes } from "../constants";
+import { RelayModes } from "../raspPi4B-hw";
 
 const Gpio = (NODE_ENV === NodeEnvTypes.NODE_ENV_DEV) ? require("pigpio-mock").Gpio : require("pigpio").Gpio;
 // import { Gpio } from "pigpio";

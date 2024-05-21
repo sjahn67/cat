@@ -1,5 +1,6 @@
 import { Cat } from "./globals";
-import { NODE_ENV, NodeEnvTypes, RelayModes } from "./constants";
+import { NODE_ENV, NodeEnvTypes } from "./constants";
+import { HwPwms, RelayChannels } from "./raspPi4B-hw";
 
 import { ledClass } from "./modules/led";
 import { scheduleJob } from "node-schedule";
