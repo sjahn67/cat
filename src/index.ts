@@ -20,7 +20,7 @@ async function updateSystem() {
     const curTemp = await get_temp();
     console.log(`...curValue-> led: ${prevLedValue}, Co2: ${prevCo2Value}`);
     console.log(`...newValue-> led: ${newValue.ledValue}, Co2: ${newValue.co2}`);
-    console.log(`...CPU Temp:${curTemp} C`);
+    console.log(`...CPU Temp: ${curTemp} C`);
     myLed.setPwm(newValue.ledValue);
     myCo2.setRelay(newValue.co2);
 }
