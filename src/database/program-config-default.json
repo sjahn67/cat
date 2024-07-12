@@ -1,5 +1,5 @@
 {
-  "version": 0,
+  "version": 1,
   "name": "Seongjin's Cat",
   "led": {
     "gpioNumber": 12,
@@ -10,6 +10,7 @@
     "changeInterval": 10
   },
   "co2": {
+    "enable": true,
     "gpioNumber": 16
   }
 }

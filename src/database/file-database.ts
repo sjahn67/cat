@@ -43,6 +43,10 @@ export function getProgramConfig(): IProgramConfig {
       // console.info(json);
       switch (jsonCurrent['version']) {
 
+        case 0: {
+          json.co2.enable = jsonFactory.co2.enable;
+        }
+
         default: {
           break;
         }

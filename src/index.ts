@@ -22,10 +22,13 @@ async function updateSystem() {
     console.log(`...newValue-> led: ${newValue.ledValue}, Co2: ${newValue.co2}`);
     console.log(`...CPU Temp: ${curTemp} C`);
     myLed.setPwm(newValue.ledValue);
-    myCo2.setRelay(newValue.co2);
+    if (Cat.ProgramConfig.co2.enable) {
+        myCo2.setRelay(newValue.co2);
+    };
 }
 
 async function main() {
+    myCo2.setRelay(false);
     updateSystem();
     job = scheduleJob('0 * * * * *', updateSystem);
 }

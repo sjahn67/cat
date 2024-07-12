@@ -10,6 +10,7 @@ export interface IProgramConfig {
         changeInterval: number
     },
     co2: {
-        gpioNumber: number
+        gpioNumber: number,
+        enable: boolean;
     }
 }
