@@ -7,6 +7,7 @@ import { scheduleJob } from "node-schedule";
 import { planManager } from "./procedure/plan";
 import { relayClass } from "./modules/relay";
 import { get_temp } from "./modules/thermo";
+import sensor from "ds18b20-raspi-typescript";
 
 const myLed = new ledClass(Cat.ProgramConfig.led.gpioNumber, Cat.ProgramConfig.led.curFrequence);
 const myCo2 = new relayClass(Cat.ProgramConfig.co2.gpioNumber);
@@ -25,6 +26,8 @@ async function updateSystem() {
     if (Cat.ProgramConfig.co2.enable) {
         myCo2.setRelay(newValue.co2);
     };
+    const tempC = sensor.readSimpleC(5);
+    console.log(`...Water Temp: ${tempC} degC`);
 }
 
 async function main() {
