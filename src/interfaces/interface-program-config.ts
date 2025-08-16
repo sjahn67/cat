@@ -1,16 +1,21 @@
+import { HwPwms, RelayChannels } from "../raspPi4B-hw";
+
+export interface IHwPwmConfig {
+    pwmNum: HwPwms,
+    maxFrequence: number,
+    curFrequence: number,
+    maxDutyCycle: number,
+    dutyCycleStep: number,
+    changeInterval: number
+}
+
 export interface IProgramConfig {
     version: number,
     name: string,
-    led: {
-        gpioNumber: number,
-        maxFrequence: number,
-        curFrequence: number,
-        maxDutyCycle: number,
-        dutyCycleStep: number,
-        changeInterval: number
-    },
+    led: IHwPwmConfig,
     co2: {
-        gpioNumber: number,
+        channelNum: RelayChannels,
         enable: boolean;
-    }
+    },
+    fan: IHwPwmConfig
 }

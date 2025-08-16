@@ -9,8 +9,8 @@ import { relayClass } from "./modules/relay";
 import { get_temp } from "./modules/thermo";
 import sensor from "ds18b20-raspi-typescript";
 
-const myLed = new ledClass(Cat.ProgramConfig.led.gpioNumber, Cat.ProgramConfig.led.curFrequence);
-const myCo2 = new relayClass(Cat.ProgramConfig.co2.gpioNumber);
+const myLed = new ledClass(Cat.ProgramConfig.led.pwmNum, Cat.ProgramConfig.led.curFrequence);
+const myCo2 = new relayClass(Cat.ProgramConfig.co2.channelNum);
 const myPlan = new planManager();
 let job = null;
 

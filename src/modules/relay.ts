@@ -1,14 +1,15 @@
 import { Cat } from "../globals";
 import { NODE_ENV, NodeEnvTypes } from "../constants";
-import { RelayModes } from "../raspPi4B-hw";
+import { RelayChannels, RelayModes } from "../raspPi4B-hw";
+import * as GPIO from "pigpio";
+import * as GPIO_MOCK from  "pigpio-mock";
+const Gpio: GPIO.Gpio | GPIO_MOCK.Gpio = (NODE_ENV === NodeEnvTypes.NODE_ENV_DEV) ? GPIO_MOCK.Gpio : GPIO.Gpio;
 
-const Gpio = (NODE_ENV === NodeEnvTypes.NODE_ENV_DEV) ? require("pigpio-mock").Gpio : require("pigpio").Gpio;
-// import { Gpio } from "pigpio";
 export class relayClass {
-    private relay;
+    private relay: GPIO.Gpio | GPIO_MOCK.Gpio;
     private curValue: number;
-    constructor(gpioNumber: number) {
-        this.relay = new Gpio(gpioNumber, { mode: Gpio.OUTPUT });
+    constructor(chanellNum: RelayChannels) {
+        this.relay = new Gpio(chanellNum, { mode: Gpio.OUTPUT });
         this.curValue = this.relay.digitalRead();
     }
 

@@ -1,16 +1,18 @@
 import { Cat } from "../globals";
 import { NODE_ENV, NodeEnvTypes } from "../constants";
-const Gpio = (NODE_ENV === NodeEnvTypes.NODE_ENV_DEV) ? require("pigpio-mock").Gpio : require("pigpio").Gpio;
-// import { Gpio } from "pigpio";
+import * as GPIO from "pigpio";
+import * as GPIO_MOCK from  "pigpio-mock";
+import { HwPwms } from "../raspPi4B-hw";
+const Gpio: GPIO.Gpio | GPIO_MOCK.Gpio = (NODE_ENV === NodeEnvTypes.NODE_ENV_DEV) ? GPIO_MOCK.Gpio : GPIO.Gpio;
 export class ledClass {
-  private led;
+  private led: GPIO.Gpio | GPIO_MOCK.Gpio;
   private TargetDutyCycle: number;
   private CurrentDutyCyle: number;
   private Frequence: number;
   private pValue: number;
 
-  constructor(gpioNumber: number, frequence: number) {
-    this.led = new Gpio(gpioNumber, { mode: Gpio.OUTPUT });
+  constructor(pwmNum: HwPwms, frequence: number) {
+    this.led = new Gpio(pwmNum, { mode: Gpio.OUTPUT });
     this.TargetDutyCycle = this.CurrentDutyCyle = 0
     this.pValue = this.CurrentDutyCyle * 100 / Cat.ProgramConfig.led.maxDutyCycle;
 

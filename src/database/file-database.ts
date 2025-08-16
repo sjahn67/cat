@@ -7,6 +7,7 @@ import * as path from "path";
 import * as _ from "lodash";
 import { Json } from "../interfaces/interface-json";
 import { IProgramConfig } from "../interfaces/interface-program-config";
+import { programConfigDef } from "./program-config-default";
 
 function getDefault(top: Json, item: string, defaultValue: Json): Json {
   let itemUndefined: boolean = _.isUndefined(top[item])
@@ -24,13 +25,11 @@ export function getProgramConfig(): IProgramConfig {
   winston.info("Database.getProgramConfig()");
   const PROGRAM_CONFIG_FILE_NAME = "program-config.json";
   const PROGRAM_CONFIG_FILE_PATH = path.join(DB_DIR_PATH, PROGRAM_CONFIG_FILE_NAME);
-  const DEFAULT_PROGRAM_CONFIG_FILE_NAME = "program-config-default.json";
-  const DEFAULT_PROGRAM_CONFIG_FILE_PATH = path.join(__dirname, DEFAULT_PROGRAM_CONFIG_FILE_NAME);
 
   let json: IProgramConfig;
   try {
     const jsonCurrent: object = JSON.parse(fs.readFileSync(PROGRAM_CONFIG_FILE_PATH, "utf8"));
-    const jsonFactory: IProgramConfig = JSON.parse(fs.readFileSync(DEFAULT_PROGRAM_CONFIG_FILE_PATH, "utf8"));
+    const jsonFactory: IProgramConfig = programConfigDef;
 
     if (_.isUndefined(jsonCurrent['version'])) {
       jsonCurrent['version'] = 0;
@@ -57,7 +56,7 @@ export function getProgramConfig(): IProgramConfig {
     }
   } catch (error) {
     winston.warn("    " + error);
-    json = JSON.parse(fs.readFileSync(DEFAULT_PROGRAM_CONFIG_FILE_PATH, "utf8"));
+    json = programConfigDef;
     fs.writeFileSync(PROGRAM_CONFIG_FILE_PATH, JSON.stringify(json, null, 2));
   }
 
