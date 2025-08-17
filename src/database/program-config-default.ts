@@ -23,6 +23,12 @@ export const programConfigDef: IProgramConfig = {
     maxDutyCycle: 1000000,
     dutyCycleStep: 1000,
     changeInterval: 10
+  },
+  tempControl: {
+    channelNum: RelayChannels.CH2,
+    startTemp: 27,
+    endTemp: 26.5,
+    enable: true
   }
 
 }

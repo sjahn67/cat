@@ -17,5 +17,11 @@ export interface IProgramConfig {
         channelNum: RelayChannels,
         enable: boolean;
     },
-    fan: IHwPwmConfig
+    fan: IHwPwmConfig,
+    tempControl: {
+        channelNum: RelayChannels,
+        startTemp: number,
+        endTemp: number,
+        enable: boolean
+    }
 }
