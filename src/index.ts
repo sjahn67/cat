@@ -22,10 +22,10 @@ async function updateSystem() {
     const newValue = myPlan.getCurrentValue();
     const curTemp = await get_temp();
     const tempC = sensor.readSimpleC(5);
-    console.log(`...curValue-> led: ${prevLedValue}, Co2: ${prevCo2Value}`);
-    console.log(`...newValue-> led: ${newValue.ledValue}, Co2: ${newValue.co2}`);
-    console.log(`...CPU Temp: ${curTemp} C`);
-    console.log(`...Water Temp: ${tempC} degC\n`);
+    console.log(`...curValue-> led: ${prevLedValue}%, Co2: ${prevCo2Value}`);
+    console.log(`...newValue-> led: ${newValue.ledValue}%, Co2: ${newValue.co2}`);
+    console.log(`...CPU Temp: ${curTemp} degC`);
+    console.log(`...Water Temp: ${tempC} degC`);
     // Operate LED and CO2 based on the plan
     if (prevLedValue !== newValue.ledValue) {
         console.log(`...Set LED PWM to ${newValue.ledValue}`);
