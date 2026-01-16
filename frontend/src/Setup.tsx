@@ -8,16 +8,27 @@ interface ScheduleItem {
     co2: boolean;
 }
 
+interface TempConfig {
+    startTemp: number;
+    endTemp: number;
+    enable: boolean;
+}
+
 interface SetupProps {
     onBack: () => void;
 }
 
 export default function Setup({ onBack }: SetupProps) {
     const [schedule, setSchedule] = useState<ScheduleItem[]>([]);
+    const [tempConfig, setTempConfig] = useState<TempConfig>({ startTemp: 0, endTemp: 0, enable: false });
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        fetchSchedule();
+        const loadAll = async () => {
+            await Promise.all([fetchSchedule(), fetchConfig()]);
+            setLoading(false);
+        };
+        loadAll();
     }, []);
 
     const fetchSchedule = async () => {
@@ -27,8 +38,32 @@ export default function Setup({ onBack }: SetupProps) {
         } catch (err) {
             console.error("Failed to fetch schedule", err);
             alert("Failed to load schedule data.");
-        } finally {
-            setLoading(false);
+        }
+    };
+
+    const fetchConfig = async () => {
+        try {
+            const res = await axios.get('/api/config');
+            if (res.data && res.data.tempControl) {
+                setTempConfig({
+                    startTemp: res.data.tempControl.startTemp,
+                    endTemp: res.data.tempControl.endTemp,
+                    enable: res.data.tempControl.enable
+                });
+            }
+        } catch (err) {
+            console.error("Failed to fetch config", err);
+        }
+    };
+
+    const handleTempSave = async () => {
+        try {
+            await axios.post('/api/config/temp', tempConfig);
+            alert("Temperature settings saved!");
+        } catch (err: any) {
+            console.error("Failed to save temp config", err);
+            const errorMessage = err.response?.data?.error || "Failed to save temperature settings.";
+            alert(errorMessage);
         }
     };
 
@@ -99,6 +134,48 @@ export default function Setup({ onBack }: SetupProps) {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
                 <h2>Schedule Setup</h2>
                 <button onClick={onBack} style={{ padding: '8px 16px', cursor: 'pointer' }}>Back to Dashboard</button>
+            </div>
+
+            <div style={{ marginBottom: '20px', border: '1px solid #ccc', padding: '15px', borderRadius: '8px', backgroundColor: '#f9f9f9' }}>
+                <h3 style={{ marginTop: 0 }}>Temperature Control</h3>
+                <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap', alignItems: 'flex-end' }}>
+                    <div>
+                        <label style={{ display: 'block', marginBottom: '5px', fontSize: '14px' }}>Start Temp (°C)</label>
+                        <input
+                            type="number"
+                            step="0.1"
+                            value={tempConfig.startTemp}
+                            onChange={(e) => setTempConfig({ ...tempConfig, startTemp: Number(e.target.value) })}
+                            style={{ padding: '5px', width: '80px' }}
+                        />
+                    </div>
+                    <div>
+                        <label style={{ display: 'block', marginBottom: '5px', fontSize: '14px' }}>End Temp (°C)</label>
+                        <input
+                            type="number"
+                            step="0.1"
+                            value={tempConfig.endTemp}
+                            onChange={(e) => setTempConfig({ ...tempConfig, endTemp: Number(e.target.value) })}
+                            style={{ padding: '5px', width: '80px' }}
+                        />
+                    </div>
+                    <div style={{ paddingBottom: '8px' }}>
+                        <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
+                            <input
+                                type="checkbox"
+                                checked={tempConfig.enable}
+                                onChange={(e) => setTempConfig({ ...tempConfig, enable: e.target.checked })}
+                                style={{ marginRight: '5px', transform: 'scale(1.2)' }}
+                            />
+                            Enable Fan Control
+                        </label>
+                    </div>
+                    <div>
+                        <button onClick={handleTempSave} style={{ padding: '6px 12px', backgroundColor: '#008CBA', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
+                            Save Temp Settings
+                        </button>
+                    </div>
+                </div>
             </div>
 
             <div style={{ overflowX: 'auto' }}>

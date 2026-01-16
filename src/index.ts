@@ -83,6 +83,19 @@ app.post("/api/fan", (req, res) => {
     res.json(systemStatus);
 });
 
+app.get("/api/config", (req, res) => {
+    res.json(Cat.ProgramConfig);
+});
+
+app.post("/api/config/temp", (req, res) => {
+    const { startTemp, endTemp, enable } = req.body;
+    if (startTemp !== undefined) Cat.ProgramConfig.tempControl.startTemp = Number(startTemp);
+    if (endTemp !== undefined) Cat.ProgramConfig.tempControl.endTemp = Number(endTemp);
+    if (enable !== undefined) Cat.ProgramConfig.tempControl.enable = Boolean(enable);
+    console.log(`...Updated Temp Control: Start=${Cat.ProgramConfig.tempControl.startTemp}, End=${Cat.ProgramConfig.tempControl.endTemp}, Enable=${Cat.ProgramConfig.tempControl.enable}`);
+    res.json({ success: true });
+});
+
 app.get("/api/schedule", (req, res) => {
     res.json(myPlan.getSchedule());
 });
