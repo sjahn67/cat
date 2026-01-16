@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import axios from 'axios';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
@@ -19,6 +19,7 @@ interface GraphData {
 function App() {
     const [status, setStatus] = useState<SystemStatus | null>(null);
     const [graphData, setGraphData] = useState<GraphData[]>([]);
+    const lastRecordedMinute = useRef<number | null>(null);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -29,14 +30,19 @@ function App() {
 
                 setStatus(data);
 
-                setGraphData(prev => {
-                    const now = new Date();
-                    const timeStr = `${now.getHours()}:${now.getMinutes()}:${now.getSeconds()}`;
-                    const newData = [...prev, { time: timeStr, led: data.led }];
-                    // 최근 20개 데이터만 유지
-                    if (newData.length > 20) return newData.slice(newData.length - 20);
-                    return newData;
-                });
+                const now = new Date();
+                const currentMinute = now.getMinutes();
+
+                if (lastRecordedMinute.current !== currentMinute) {
+                    lastRecordedMinute.current = currentMinute;
+                    setGraphData(prev => {
+                        const timeStr = `${now.getHours()}:${String(now.getMinutes()).padStart(2, '0')}`;
+                        const newData = [...prev, { time: timeStr, led: data.led }];
+                        // 최근 20개 데이터만 유지 (20분)
+                        if (newData.length > 20) return newData.slice(newData.length - 20);
+                        return newData;
+                    });
+                }
             } catch (error) {
                 console.error("Error fetching status:", error);
             }
