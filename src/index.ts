@@ -3,18 +3,62 @@ import { NODE_ENV, NodeEnvTypes } from "./constants";
 import { HwPwms, RelayChannels } from "./raspPi4B-hw";
 
 import { ledClass } from "./modules/led";
-import { scheduleJob } from "node-schedule";
 import { planManager } from "./procedure/plan";
 import { relayClass } from "./modules/relay";
 import { get_temp } from "./modules/thermo";
 import sensor from "ds18b20-raspi-typescript";
 import { periodicCheck } from "./etc";
+import express from "express";
+import cors from "cors";
+import path from "path";
 
 const myLed = new ledClass(Cat.ProgramConfig.led.pwmNum, Cat.ProgramConfig.led.curFrequence);
 const myCo2 = new relayClass(Cat.ProgramConfig.co2.channelNum);
 const CoolingFan = new relayClass(Cat.ProgramConfig.tempControl.channelNum);
 const myPlan = new planManager();
-let job = null;
+
+// Web Server Setup
+const app = express();
+const PORT = 3001;
+
+let isManualMode = false;
+
+let systemStatus = {
+    led: 0,
+    co2: false,
+    cpuTemp: 0,
+    waterTemp: 0,
+    fan: false,
+    isManual: false
+};
+
+app.use(cors());
+app.use(express.json());
+app.use(express.static(path.join(__dirname, "../frontend/dist"))); // React 빌드 경로 (예시)
+
+app.get("/api/status", (req, res) => {
+    res.json(systemStatus);
+});
+
+app.post("/api/led", (req, res) => {
+    const { value, manual } = req.body;
+    if (typeof manual === 'boolean') {
+        isManualMode = manual;
+    }
+    if (isManualMode && typeof value === 'number') {
+        myLed.setPwm(value);
+        console.log(`...Manual LED Control: ${value}%`);
+    }
+    // Update status immediately for response
+    systemStatus.led = myLed.getValue();
+    systemStatus.isManual = isManualMode;
+    res.json(systemStatus);
+});
+
+// React SPA Fallback (API 요청 이외의 모든 경로는 index.html 반환)
+app.get("*", (req, res) => {
+    res.sendFile(path.join(__dirname, "../frontend/dist/index.html"));
+});
 
 async function updateSystem() {
     const prevLedValue = myLed.getValue();
@@ -26,10 +70,23 @@ async function updateSystem() {
     console.log(`...newValue-> led: ${newValue.ledValue}%, Co2: ${newValue.co2}`);
     console.log(`...CPU Temp: ${curTemp} degC`);
     console.log(`...Water Temp: ${tempC} degC`);
+
+    // Update Global Status for Web
+    systemStatus = {
+        led: myLed.getValue(),
+        co2: newValue.co2,
+        cpuTemp: curTemp,
+        waterTemp: tempC,
+        fan: CoolingFan.getValue(),
+        isManual: isManualMode
+    };
+
     // Operate LED and CO2 based on the plan
-    if (prevLedValue !== newValue.ledValue) {
-        console.log(`...Set LED PWM to ${newValue.ledValue}`);
-        myLed.setPwm(newValue.ledValue);
+    if (!isManualMode) {
+        if (prevLedValue !== newValue.ledValue) {
+            console.log(`...Set LED PWM to ${newValue.ledValue}`);
+            myLed.setPwm(newValue.ledValue);
+        }
     }
     if (prevCo2Value !== newValue.co2) {
         console.log(`...Set CO2 Relay to ${newValue.co2 ? "ON" : "OFF"}`);
@@ -51,7 +108,6 @@ async function main() {
     myCo2.setRelay(false);
     CoolingFan.setRelay(false);
     updateSystem();
-    // job = scheduleJob('0 * * * * *', updateSystem);
     periodicCheck(async () => {
         try {
             await updateSystem();
@@ -60,6 +116,9 @@ async function main() {
         }
     }, 5000);
 
+    app.listen(PORT, () => {
+        console.log(`Web Server running on http://localhost:${PORT}`);
+    });
 }
 
 main();
