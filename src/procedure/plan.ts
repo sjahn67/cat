@@ -61,6 +61,21 @@ export class planManager {
     }
 
     public setSchedule(newData: IDataInfo[]) {
+        // Validation
+        const timeSet = new Set<string>();
+        for (const item of newData) {
+            if (!/^(?:[01]\d|2[0-3])[0-5]\d$/.test(item.time)) {
+                throw new Error(`Invalid time format: ${item.time}`);
+            }
+            if (item.ledValue < 0 || item.ledValue > 100) {
+                throw new Error(`LED value must be between 0 and 100. Found: ${item.ledValue}`);
+            }
+            if (timeSet.has(item.time)) {
+                throw new Error(`Duplicate time entry: ${item.time}`);
+            }
+            timeSet.add(item.time);
+        }
+
         // Sort by time to ensure correct order
         this.data = newData.sort((a, b) => Number(a.time) - Number(b.time));
 

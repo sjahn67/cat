@@ -87,10 +87,19 @@ app.get("/api/schedule", (req, res) => {
     res.json(myPlan.getSchedule());
 });
 
-app.post("/api/schedule", (req, res) => {
-    const newData = req.body;
-    myPlan.setSchedule(newData);
-    res.json({ success: true });
+app.post("/api/schedule", async (req, res) => {
+    try {
+        const newData = req.body;
+        myPlan.setSchedule(newData);
+
+        // Resume Auto Mode and apply changes immediately
+        isManualMode = false;
+        await updateSystem();
+
+        res.json({ success: true });
+    } catch (error: any) {
+        res.status(400).json({ error: error.message });
+    }
 });
 
 // React SPA Fallback (API 요청 이외의 모든 경로는 index.html 반환)

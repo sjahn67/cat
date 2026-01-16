@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
+import { ComposedChart, Line, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 
 interface ScheduleItem {
     time: string;
@@ -32,17 +33,30 @@ export default function Setup({ onBack }: SetupProps) {
     };
 
     const handleSave = async () => {
+        // Validate time format (HHMM: 0000-2359)
+        for (let i = 0; i < schedule.length; i++) {
+            const item = schedule[i];
+            if (!/^(?:[01]\d|2[0-3])[0-5]\d$/.test(item.time)) {
+                alert(`Row ${i + 1}: Invalid time format (${item.time}). Please use HHMM (0000-2359).`);
+                return;
+            }
+        }
         try {
             await axios.post('/api/schedule', schedule);
             alert("Schedule saved successfully!");
             onBack();
-        } catch (err) {
+        } catch (err: any) {
             console.error("Failed to save schedule", err);
-            alert("Failed to save schedule.");
+            const errorMessage = err.response?.data?.error || "Failed to save schedule.";
+            alert(errorMessage);
         }
     };
 
     const handleChange = (index: number, field: keyof ScheduleItem, value: any) => {
+        if (field === 'time') {
+            // Allow only numbers
+            if (!/^\d*$/.test(value)) return;
+        }
         const newSchedule = [...schedule];
         newSchedule[index] = { ...newSchedule[index], [field]: value };
         setSchedule(newSchedule);
@@ -57,6 +71,25 @@ export default function Setup({ onBack }: SetupProps) {
 
     const handleAdd = () => {
         setSchedule([...schedule, { time: "0000", ledValue: 0, co2: false }]);
+    };
+
+    const handleSort = () => {
+        const sortedSchedule = [...schedule].sort((a, b) => a.time.localeCompare(b.time));
+        setSchedule(sortedSchedule);
+    };
+
+    const getGraphData = () => {
+        return [...schedule]
+            .sort((a, b) => a.time.localeCompare(b.time))
+            .map(item => {
+                const h = parseInt(item.time.substring(0, 2) || "0", 10);
+                const m = parseInt(item.time.substring(2, 4) || "0", 10);
+                return {
+                    ...item,
+                    timeNum: (isNaN(h) ? 0 : h) * 60 + (isNaN(m) ? 0 : m),
+                    co2Height: item.co2 ? 100 : 0
+                };
+            });
     };
 
     if (loading) return <div className="p-10">Loading...</div>;
@@ -122,9 +155,42 @@ export default function Setup({ onBack }: SetupProps) {
                 </table>
             </div>
 
+            <div style={{ marginBottom: '20px', border: '1px solid #ccc', padding: '10px', borderRadius: '8px' }}>
+                <h3 style={{ marginTop: 0 }}>Schedule Preview</h3>
+                <div style={{ width: '100%', height: 300 }}>
+                    <ResponsiveContainer>
+                        <ComposedChart data={getGraphData()}>
+                            <CartesianGrid strokeDasharray="3 3" />
+                            <XAxis
+                                dataKey="timeNum"
+                                type="number"
+                                domain={[0, 1440]}
+                                tickFormatter={(tick) => {
+                                    const h = Math.floor(tick / 60);
+                                    const m = tick % 60;
+                                    return `${String(h).padStart(2, '0')}${String(m).padStart(2, '0')}`;
+                                }}
+                            />
+                            <YAxis domain={[0, 100]} />
+                            <Tooltip labelFormatter={(label) => {
+                                const h = Math.floor(label / 60);
+                                const m = label % 60;
+                                return `${String(h).padStart(2, '0')}${String(m).padStart(2, '0')}`;
+                            }} />
+                            <Legend />
+                            <Area type="stepAfter" dataKey="co2Height" fill="#82ca9d" stroke="#82ca9d" fillOpacity={0.3} name="CO2 (ON/OFF)" />
+                            <Line type="monotone" dataKey="ledValue" stroke="#8884d8" strokeWidth={2} name="LED %" />
+                        </ComposedChart>
+                    </ResponsiveContainer>
+                </div>
+            </div>
+
             <div style={{ display: 'flex', gap: '10px' }}>
                 <button onClick={handleAdd} style={{ padding: '10px 20px', backgroundColor: '#4CAF50', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
                     Add Row
+                </button>
+                <button onClick={handleSort} style={{ padding: '10px 20px', backgroundColor: '#FF9800', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
+                    Sort by Time
                 </button>
                 <button onClick={handleSave} style={{ padding: '10px 20px', backgroundColor: '#008CBA', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
                     Save Changes
