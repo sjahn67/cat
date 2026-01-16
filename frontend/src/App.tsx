@@ -14,14 +14,32 @@ interface SystemStatus {
 interface GraphData {
     time: string;
     led: number;
+    cpuTemp: number;
+    waterTemp: number;
 }
 
 function App() {
     const [status, setStatus] = useState<SystemStatus | null>(null);
-    const [graphData, setGraphData] = useState<GraphData[]>([]);
+    const [graphData, setGraphData] = useState<GraphData[]>(() => {
+        const saved = localStorage.getItem('graphData');
+        return saved ? JSON.parse(saved) : [];
+    });
     const lastRecordedMinute = useRef<number | null>(null);
 
     useEffect(() => {
+        localStorage.setItem('graphData', JSON.stringify(graphData));
+    }, [graphData]);
+
+    useEffect(() => {
+        // Initialize ref based on loaded data to prevent duplicates on reload
+        if (graphData.length > 0) {
+            const lastTime = graphData[graphData.length - 1].time;
+            const parts = lastTime.split(':');
+            if (parts.length >= 2) {
+                lastRecordedMinute.current = parseInt(parts[1], 10);
+            }
+        }
+
         const fetchData = async () => {
             try {
                 // 개발 환경에서는 백엔드 주소 명시 필요, 배포 시에는 상대 경로 사용 가능
@@ -37,7 +55,12 @@ function App() {
                     lastRecordedMinute.current = currentMinute;
                     setGraphData(prev => {
                         const timeStr = `${now.getHours()}:${String(now.getMinutes()).padStart(2, '0')}`;
-                        const newData = [...prev, { time: timeStr, led: data.led }];
+                        const newData = [...prev, {
+                            time: timeStr,
+                            led: data.led,
+                            cpuTemp: data.cpuTemp,
+                            waterTemp: data.waterTemp
+                        }];
                         // 최근 20개 데이터만 유지 (20분)
                         if (newData.length > 20) return newData.slice(newData.length - 20);
                         return newData;
@@ -114,7 +137,9 @@ function App() {
                             <XAxis dataKey="time" />
                             <YAxis domain={[0, 100]} />
                             <Tooltip />
-                            <Line type="monotone" dataKey="led" stroke="#8884d8" strokeWidth={2} />
+                            <Line type="monotone" dataKey="led" stroke="#8884d8" strokeWidth={2} name="LED %" />
+                            <Line type="monotone" dataKey="waterTemp" stroke="#82ca9d" strokeWidth={2} name="Water °C" />
+                            <Line type="monotone" dataKey="cpuTemp" stroke="#ff7300" strokeWidth={2} name="CPU °C" />
                         </LineChart>
                     </ResponsiveContainer>
                 </div>
