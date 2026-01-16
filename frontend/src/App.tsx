@@ -93,7 +93,7 @@ function App() {
                 <StatusCard title="CPU Temp" value={`${status.cpuTemp} °C`} />
                 <StatusCard title="CO2 Relay" value={status.co2 ? "ON" : "OFF"} color={status.co2 ? 'green' : 'gray'} />
                 <StatusCard title="Cooling Fan" value={status.fan ? "ON" : "OFF"} color={status.fan ? 'green' : 'gray'} />
-                <StatusCard title="LED Brightness" value={`${status.led}%`} />
+                <StatusCard title="LED Brightness" value={`${status.led.toFixed(2)}%`} />
             </div>
 
             <div style={{ border: '1px solid #ccc', padding: '20px', borderRadius: '8px', marginBottom: '20px' }}>
@@ -107,7 +107,7 @@ function App() {
                         onChange={handleLedChange}
                         style={{ width: '300px' }}
                     />
-                    <span style={{ minWidth: '50px' }}>{status.led}%</span>
+                    <span style={{ minWidth: '50px' }}>{status.led.toFixed(2)}%</span>
                     <button onClick={setAutoMode} disabled={!status.isManual} style={{ padding: '5px 10px', cursor: status.isManual ? 'pointer' : 'default' }}>
                         {status.isManual ? "Resume Auto Schedule" : "Auto Mode Active"}
                     </button>
