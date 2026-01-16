@@ -85,10 +85,10 @@ function App() {
     if (!status) return <div className="p-10">Loading...</div>;
 
     return (
-        <div style={{ padding: '20px', fontFamily: 'Arial, sans-serif' }}>
-            <h1>Aquarium Controller Dashboard</h1>
+        <div style={{ padding: '10px', fontFamily: 'Arial, sans-serif', maxWidth: '800px', margin: '0 auto' }}>
+            <h1 style={{ textAlign: 'center', fontSize: '1.5rem', marginBottom: '20px' }}>Aquarium Controller</h1>
 
-            <div style={{ display: 'flex', gap: '20px', marginBottom: '30px' }}>
+            <div style={{ display: 'flex', gap: '10px', marginBottom: '20px', flexWrap: 'wrap', justifyContent: 'center' }}>
                 <StatusCard title="Water Temp" value={`${status.waterTemp} °C`} color={status.waterTemp > 28 ? 'red' : 'blue'} />
                 <StatusCard title="CPU Temp" value={`${status.cpuTemp} °C`} />
                 <StatusCard title="CO2 Relay" value={status.co2 ? "ON" : "OFF"} color={status.co2 ? 'green' : 'gray'} />
@@ -96,37 +96,37 @@ function App() {
                 <StatusCard title="LED Brightness" value={`${status.led.toFixed(2)}%`} />
             </div>
 
-            <div style={{ border: '1px solid #ccc', padding: '20px', borderRadius: '8px', marginBottom: '20px' }}>
-                <h3>LED Control</h3>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+            <div style={{ border: '1px solid #ccc', padding: '15px', borderRadius: '8px', marginBottom: '20px' }}>
+                <h3 style={{ marginTop: 0 }}>LED Control</h3>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
                     <input
                         type="range"
                         min="0"
                         max="100"
                         value={status.led}
                         onChange={handleLedChange}
-                        style={{ width: '300px' }}
+                        style={{ flex: '1 1 200px', width: '100%' }}
                     />
-                    <span style={{ minWidth: '50px' }}>{status.led.toFixed(2)}%</span>
-                    <button onClick={setAutoMode} disabled={!status.isManual} style={{ padding: '5px 10px', cursor: status.isManual ? 'pointer' : 'default' }}>
+                    <span style={{ minWidth: '60px', textAlign: 'right' }}>{status.led.toFixed(2)}%</span>
+                    <button onClick={setAutoMode} disabled={!status.isManual} style={{ padding: '8px 12px', cursor: status.isManual ? 'pointer' : 'default', flex: '0 0 auto' }}>
                         {status.isManual ? "Resume Auto Schedule" : "Auto Mode Active"}
                     </button>
                 </div>
             </div>
 
-            <div style={{ border: '1px solid #ccc', padding: '20px', borderRadius: '8px' }}>
-                <h3>LED Brightness History</h3>
+            <div style={{ border: '1px solid #ccc', padding: '10px', borderRadius: '8px' }}>
+                <h3 style={{ marginTop: 0, marginLeft: '5px' }}>History</h3>
                 <div style={{ width: '100%', height: 300 }}>
                     <ResponsiveContainer>
-                        <LineChart data={graphData}>
+                        <LineChart data={graphData} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
                             <CartesianGrid strokeDasharray="3 3" />
-                            <XAxis dataKey="time" />
-                            <YAxis yAxisId="left" orientation="left" label={{ value: 'Temp (°C)', angle: -90, position: 'insideLeft' }} />
-                            <YAxis yAxisId="right" orientation="right" domain={[0, 100]} label={{ value: 'LED (%)', angle: 90, position: 'insideRight' }} />
+                            <XAxis dataKey="time" tick={{ fontSize: 12 }} />
+                            <YAxis yAxisId="left" orientation="left" width={40} tick={{ fontSize: 12 }} />
+                            <YAxis yAxisId="right" orientation="right" domain={[0, 100]} width={40} tick={{ fontSize: 12 }} />
                             <Tooltip />
-                            <Line yAxisId="right" type="monotone" dataKey="led" stroke="#8884d8" strokeWidth={2} name="LED %" />
-                            <Line yAxisId="left" type="monotone" dataKey="waterTemp" stroke="#82ca9d" strokeWidth={2} name="Water °C" />
-                            <Line yAxisId="left" type="monotone" dataKey="cpuTemp" stroke="#ff7300" strokeWidth={2} name="CPU °C" />
+                            <Line yAxisId="right" type="monotone" dataKey="led" stroke="#8884d8" strokeWidth={2} name="LED %" dot={false} />
+                            <Line yAxisId="left" type="monotone" dataKey="waterTemp" stroke="#82ca9d" strokeWidth={2} name="Water °C" dot={false} />
+                            <Line yAxisId="left" type="monotone" dataKey="cpuTemp" stroke="#ff7300" strokeWidth={2} name="CPU °C" dot={false} />
                         </LineChart>
                     </ResponsiveContainer>
                 </div>
@@ -139,13 +139,13 @@ const StatusCard = ({ title, value, color = 'black' }: { title: string, value: s
     <div style={{
         border: '1px solid #ddd',
         borderRadius: '8px',
-        padding: '15px',
-        minWidth: '150px',
+        padding: '10px',
+        flex: '1 1 140px',
         textAlign: 'center',
         boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
     }}>
-        <div style={{ fontSize: '14px', color: '#666', marginBottom: '5px' }}>{title}</div>
-        <div style={{ fontSize: '24px', fontWeight: 'bold', color: color }}>{value}</div>
+        <div style={{ fontSize: '12px', color: '#666', marginBottom: '5px' }}>{title}</div>
+        <div style={{ fontSize: '20px', fontWeight: 'bold', color: color }}>{value}</div>
     </div>
 );
 
