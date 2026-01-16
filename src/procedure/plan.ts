@@ -4,7 +4,7 @@ import { Json } from "../interfaces/interface-json";
 import { join } from "path";
 import * as fs from "fs";
 
-interface IDataInfo {
+export interface IDataInfo {
     time: string,
     ledValue: number,
     ledDelta?: number,
@@ -37,7 +37,11 @@ export class planManager {
             console.log("error:", err);
         }
 
-        // calculate delta
+        this.calculateDeltas();
+        console.log(this.data);
+    }
+
+    private calculateDeltas() {
         let sData: IDataInfo = null;
         this.data.forEach(item => {
             if (sData !== null) {
@@ -50,7 +54,25 @@ export class planManager {
                 sData = item;
             }
         })
-        console.log(this.data);
+    }
+
+    public getSchedule(): IDataInfo[] {
+        return this.data;
+    }
+
+    public setSchedule(newData: IDataInfo[]) {
+        // Sort by time to ensure correct order
+        this.data = newData.sort((a, b) => Number(a.time) - Number(b.time));
+
+        this.calculateDeltas();
+
+        // Save to file
+        const json = { table: this.data };
+        try {
+            fs.writeFileSync(SCHEDULE_DATA_PATH, JSON.stringify(json, null, 2));
+        } catch (e) {
+            console.error("Failed to save schedule data:", e);
+        }
     }
 
     private getMinTime(source: string | number): number {

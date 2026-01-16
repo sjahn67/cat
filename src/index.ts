@@ -83,6 +83,16 @@ app.post("/api/fan", (req, res) => {
     res.json(systemStatus);
 });
 
+app.get("/api/schedule", (req, res) => {
+    res.json(myPlan.getSchedule());
+});
+
+app.post("/api/schedule", (req, res) => {
+    const newData = req.body;
+    myPlan.setSchedule(newData);
+    res.json({ success: true });
+});
+
 // React SPA Fallback (API 요청 이외의 모든 경로는 index.html 반환)
 app.get(/.*/, (req, res) => {
     res.sendFile(path.join(__dirname, "../frontend/dist/index.html"));

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import Setup from './Setup';
 
 interface SystemStatus {
     led: number;
@@ -20,6 +21,8 @@ interface GraphData {
 
 function App() {
     const [status, setStatus] = useState<SystemStatus | null>(null);
+    const [timeRange, setTimeRange] = useState<'1h' | '6h' | '24h'>('1h');
+    const [view, setView] = useState<'dashboard' | 'setup'>('dashboard');
     const [graphData, setGraphData] = useState<GraphData[]>(() => {
         try {
             const saved = localStorage.getItem('graphData');
@@ -52,8 +55,8 @@ function App() {
                         cpuTemp: data.cpuTemp,
                         waterTemp: data.waterTemp
                     }];
-                    // 최근 2시간 데이터 유지 (5초 간격 * 1440개)
-                    const MAX_DATA_POINTS = 1440;
+                    // 최근 24시간 데이터 유지 (5초 간격 * 12회/분 * 60분 * 24시간 = 17280개)
+                    const MAX_DATA_POINTS = 17280;
                     if (newData.length > MAX_DATA_POINTS) return newData.slice(newData.length - MAX_DATA_POINTS);
                     return newData;
                 });
@@ -108,6 +111,19 @@ function App() {
         }
     };
 
+    const getFilteredData = () => {
+        const pointsPerMinute = 12; // 60s / 5s
+        let points = 0;
+        switch (timeRange) {
+            case '1h': points = 60 * pointsPerMinute; break;
+            case '6h': points = 6 * 60 * pointsPerMinute; break;
+            case '24h': points = 24 * 60 * pointsPerMinute; break;
+        }
+        return graphData.slice(-points);
+    };
+
+    if (view === 'setup') return <Setup onBack={() => setView('dashboard')} />;
+
     if (!status) return <div className="p-10">Loading...</div>;
 
     const styles = `
@@ -127,8 +143,15 @@ function App() {
     return (
         <div style={{ padding: '10px', fontFamily: 'Arial, sans-serif', maxWidth: '800px', margin: '0 auto' }}>
             <style>{styles}</style>
-            <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+            <div style={{ textAlign: 'center', marginBottom: '20px', position: 'relative' }}>
                 <h1 style={{ fontSize: '1.5rem', margin: '0 0 10px 0' }}>Aquarium Controller</h1>
+                <div
+                    onClick={() => setView('setup')}
+                    style={{ position: 'absolute', right: 0, top: 0, cursor: 'pointer', fontSize: '24px' }}
+                    title="Setup"
+                >
+                    ⚙️
+                </div>
                 <span style={{
                     padding: '5px 10px',
                     borderRadius: '15px',
@@ -168,10 +191,25 @@ function App() {
             </div>
 
             <div style={{ border: '1px solid #ccc', padding: '10px', borderRadius: '8px' }}>
-                <h3 style={{ marginTop: 0, marginLeft: '5px' }}>History</h3>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                    <h3 style={{ margin: '0 0 0 5px' }}>History</h3>
+                    <div style={{ display: 'flex', gap: '5px' }}>
+                        {(['1h', '6h', '24h'] as const).map((range) => (
+                            <button key={range} onClick={() => setTimeRange(range)} style={{
+                                padding: '5px 10px',
+                                backgroundColor: timeRange === range ? '#007bff' : '#f0f0f0',
+                                color: timeRange === range ? 'white' : 'black',
+                                border: 'none',
+                                borderRadius: '4px',
+                                cursor: 'pointer',
+                                fontSize: '12px'
+                            }}>{range}</button>
+                        ))}
+                    </div>
+                </div>
                 <div style={{ width: '100%', height: 300 }}>
                     <ResponsiveContainer>
-                        <LineChart data={graphData} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
+                        <LineChart data={getFilteredData()} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
                             <CartesianGrid strokeDasharray="3 3" />
                             <XAxis dataKey="time" tick={{ fontSize: 12 }} />
                             <YAxis yAxisId="left" orientation="left" width={40} tick={{ fontSize: 12 }} />
