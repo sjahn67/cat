@@ -56,7 +56,7 @@ app.post("/api/led", (req, res) => {
 });
 
 // React SPA Fallback (API 요청 이외의 모든 경로는 index.html 반환)
-app.get("*", (req, res) => {
+app.get(/.*/, (req, res) => {
     res.sendFile(path.join(__dirname, "../frontend/dist/index.html"));
 });
 
