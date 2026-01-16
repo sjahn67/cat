@@ -3,6 +3,7 @@ import { NODE_ENV, NodeEnvTypes } from "./constants";
 import { HwPwms, RelayChannels } from "./raspPi4B-hw";
 
 import { ledClass } from "./modules/led";
+import { fanClass } from "./modules/fan";
 import { planManager } from "./procedure/plan";
 import { relayClass } from "./modules/relay";
 import { get_temp } from "./modules/thermo";
@@ -13,6 +14,7 @@ import cors from "cors";
 import path from "path";
 
 const myLed = new ledClass(Cat.ProgramConfig.led.pwmNum, Cat.ProgramConfig.led.curFrequence);
+const myCpuFan = new fanClass(Cat.ProgramConfig.fan.pwmNum, Cat.ProgramConfig.fan.curFrequence);
 const myCo2 = new relayClass(Cat.ProgramConfig.co2.channelNum);
 const CoolingFan = new relayClass(Cat.ProgramConfig.tempControl.channelNum);
 const myPlan = new planManager();
@@ -29,7 +31,8 @@ let systemStatus = {
     cpuTemp: 0,
     waterTemp: 0,
     fan: false,
-    isManual: false
+    isManual: false,
+    cpuFanSpeed: 0
 };
 
 app.use(cors());
@@ -150,7 +153,8 @@ async function updateSystem() {
         cpuTemp: curTemp,
         waterTemp: tempC,
         fan: CoolingFan.getValue(),
-        isManual: isManualMode
+        isManual: isManualMode,
+        cpuFanSpeed: myCpuFan.getValue()
     };
 
     // Operate LED and CO2 based on the plan
@@ -174,6 +178,18 @@ async function updateSystem() {
             }
         }
     }
+
+    // CPU Fan Control (Independent of Manual Mode or add to manual if needed)
+    // Simple linear control: 45°C -> 0%, 70°C -> 100%
+    const cpuStartTemp = 45;
+    const cpuFullTemp = 70;
+    let targetCpuFanSpeed = 0;
+
+    if (curTemp <= cpuStartTemp) targetCpuFanSpeed = 0;
+    else if (curTemp >= cpuFullTemp) targetCpuFanSpeed = 100;
+    else targetCpuFanSpeed = Math.round(((curTemp - cpuStartTemp) / (cpuFullTemp - cpuStartTemp)) * 100);
+
+    myCpuFan.setPwm(targetCpuFanSpeed);
 }
 
 async function main() {

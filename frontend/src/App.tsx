@@ -10,6 +10,7 @@ interface SystemStatus {
     waterTemp: number;
     fan: boolean;
     isManual: boolean;
+    cpuFanSpeed: number;
 }
 
 interface GraphData {
@@ -169,6 +170,7 @@ function App() {
                 <StatusCard title="CPU Temp" value={`${status.cpuTemp} °C`} />
                 <StatusCard title="CO2 Relay" value={status.co2 ? "ON" : "OFF"} color={status.co2 ? 'green' : 'gray'} onClick={toggleCo2} icon="🫧" animation={status.co2 ? "pulse" : ""} />
                 <StatusCard title="Cooling Fan" value={status.fan ? "ON" : "OFF"} color={status.fan ? 'green' : 'gray'} onClick={toggleFan} icon="🌀" animation={status.fan ? "spin" : ""} />
+                <StatusCard title="CPU Fan Speed" value={`${status.cpuFanSpeed}%`} />
                 <StatusCard title="LED Brightness" value={`${status.led.toFixed(2)}%`} />
             </div>
 

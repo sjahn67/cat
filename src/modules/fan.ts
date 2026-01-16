@@ -1,6 +1,6 @@
 import { Cat } from "../globals";
 import { Gpio } from "pigpio";
-export class ledClass {
+export class fanClass {
   private fan: Gpio;
   private TargetDutyCycle: number;
   private CurrentDutyCyle: number;
@@ -10,17 +10,17 @@ export class ledClass {
   constructor(gpioNumber: number, frequence: number) {
     this.fan = new Gpio(gpioNumber, { mode: Gpio.OUTPUT });
     this.TargetDutyCycle = this.CurrentDutyCyle = 0
-    this.pValue = this.CurrentDutyCyle * 100 / Cat.ProgramConfig.led.maxDutyCycle;
+    this.pValue = this.CurrentDutyCyle * 100 / Cat.ProgramConfig.fan.maxDutyCycle;
 
     if (frequence < 0) this.Frequence = 0;
-    else if (Cat.ProgramConfig.led.maxFrequence < frequence) this.Frequence = Cat.ProgramConfig.led.maxFrequence;
+    else if (Cat.ProgramConfig.fan.maxFrequence < frequence) this.Frequence = Cat.ProgramConfig.fan.maxFrequence;
     else this.Frequence = frequence;
 
     setInterval(() => {
       if (this.TargetDutyCycle == this.CurrentDutyCyle) return;
       let delta = this.TargetDutyCycle - this.CurrentDutyCyle;
-      if (Math.abs(delta) > Cat.ProgramConfig.led.dutyCycleStep) {
-        delta = (delta > 0) ? Cat.ProgramConfig.led.dutyCycleStep : - Cat.ProgramConfig.led.dutyCycleStep;
+      if (Math.abs(delta) > Cat.ProgramConfig.fan.dutyCycleStep) {
+        delta = (delta > 0) ? Cat.ProgramConfig.fan.dutyCycleStep : - Cat.ProgramConfig.fan.dutyCycleStep;
       }
       this.CurrentDutyCyle += delta;
       // console.log(`${this.CurrentDutyCyle} -> ${this.TargetDutyCycle} delta:${delta}`);
@@ -35,7 +35,7 @@ export class ledClass {
     } else if (this.pValue < 0) {
       this.pValue = 0;
     }
-    this.TargetDutyCycle = Math.round(this.pValue / 100 * Cat.ProgramConfig.led.maxDutyCycle);
+    this.TargetDutyCycle = Math.round(this.pValue / 100 * Cat.ProgramConfig.fan.maxDutyCycle);
     // console.log("pValue:", this.pValue, "this.TargetDutyCycle: ", this.TargetDutyCycle);
   }
 
