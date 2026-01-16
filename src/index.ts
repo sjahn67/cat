@@ -55,6 +55,34 @@ app.post("/api/led", (req, res) => {
     res.json(systemStatus);
 });
 
+app.post("/api/co2", (req, res) => {
+    const { value, manual } = req.body;
+    if (typeof manual === 'boolean') {
+        isManualMode = manual;
+    }
+    if (isManualMode && typeof value === 'boolean') {
+        myCo2.setRelay(value);
+        console.log(`...Manual CO2 Control: ${value}`);
+    }
+    systemStatus.co2 = myCo2.getValue();
+    systemStatus.isManual = isManualMode;
+    res.json(systemStatus);
+});
+
+app.post("/api/fan", (req, res) => {
+    const { value, manual } = req.body;
+    if (typeof manual === 'boolean') {
+        isManualMode = manual;
+    }
+    if (isManualMode && typeof value === 'boolean') {
+        CoolingFan.setRelay(value);
+        console.log(`...Manual Fan Control: ${value}`);
+    }
+    systemStatus.fan = CoolingFan.getValue();
+    systemStatus.isManual = isManualMode;
+    res.json(systemStatus);
+});
+
 // React SPA Fallback (API 요청 이외의 모든 경로는 index.html 반환)
 app.get(/.*/, (req, res) => {
     res.sendFile(path.join(__dirname, "../frontend/dist/index.html"));
@@ -64,8 +92,20 @@ async function updateSystem() {
     const prevLedValue = myLed.getValue();
     const prevCo2Value = myCo2.getValue();
     const newValue = myPlan.getCurrentValue();
-    const curTemp = await get_temp();
-    const tempC = sensor.readSimpleC(5);
+
+    let curTemp = 0;
+    try {
+        curTemp = await get_temp();
+    } catch (e) {
+        console.error("Error reading CPU temp:", e);
+    }
+    let tempC = 0;
+    try {
+        tempC = sensor.readSimpleC(5);
+    } catch (e) {
+        console.error("Error reading Water temp:", e);
+    }
+
     console.log(`...curValue-> led: ${prevLedValue}%, Co2: ${prevCo2Value}`);
     console.log(`...newValue-> led: ${newValue.ledValue}%, Co2: ${newValue.co2}`);
     console.log(`...CPU Temp: ${curTemp} degC`);
@@ -74,7 +114,7 @@ async function updateSystem() {
     // Update Global Status for Web
     systemStatus = {
         led: myLed.getValue(),
-        co2: newValue.co2,
+        co2: myCo2.getValue(),
         cpuTemp: curTemp,
         waterTemp: tempC,
         fan: CoolingFan.getValue(),
@@ -87,19 +127,19 @@ async function updateSystem() {
             console.log(`...Set LED PWM to ${newValue.ledValue}`);
             myLed.setPwm(newValue.ledValue);
         }
-    }
-    if (prevCo2Value !== newValue.co2) {
-        console.log(`...Set CO2 Relay to ${newValue.co2 ? "ON" : "OFF"}`);
-        myCo2.setRelay(newValue.co2);
-    }
-    if (Cat.ProgramConfig.tempControl.enable) {
-        console.log(`...Cooling Fan status:${CoolingFan.getValue() ? "ON" : "OFF"}`);
-        if (tempC >= Cat.ProgramConfig.tempControl.startTemp && !CoolingFan.getValue()) {
-            console.log("...Set cooling Fan ON");
-            CoolingFan.setRelay(true);
-        } else if (tempC <= Cat.ProgramConfig.tempControl.endTemp && CoolingFan.getValue()) {
-            console.log("...Set cooling Fan OFF");
-            CoolingFan.setRelay(false);
+        if (prevCo2Value !== newValue.co2) {
+            console.log(`...Set CO2 Relay to ${newValue.co2 ? "ON" : "OFF"}`);
+            myCo2.setRelay(newValue.co2);
+        }
+        if (Cat.ProgramConfig.tempControl.enable) {
+            console.log(`...Cooling Fan status:${CoolingFan.getValue() ? "ON" : "OFF"}`);
+            if (tempC >= Cat.ProgramConfig.tempControl.startTemp && !CoolingFan.getValue()) {
+                console.log("...Set cooling Fan ON");
+                CoolingFan.setRelay(true);
+            } else if (tempC <= Cat.ProgramConfig.tempControl.endTemp && CoolingFan.getValue()) {
+                console.log("...Set cooling Fan OFF");
+                CoolingFan.setRelay(false);
+            }
         }
     }
 }
@@ -107,7 +147,11 @@ async function updateSystem() {
 async function main() {
     myCo2.setRelay(false);
     CoolingFan.setRelay(false);
-    updateSystem();
+    try {
+        await updateSystem();
+    } catch (e) {
+        console.error("Initial system update failed:", e);
+    }
     periodicCheck(async () => {
         try {
             await updateSystem();

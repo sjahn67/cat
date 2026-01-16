@@ -21,8 +21,13 @@ interface GraphData {
 function App() {
     const [status, setStatus] = useState<SystemStatus | null>(null);
     const [graphData, setGraphData] = useState<GraphData[]>(() => {
-        const saved = localStorage.getItem('graphData');
-        return saved ? JSON.parse(saved) : [];
+        try {
+            const saved = localStorage.getItem('graphData');
+            return saved ? JSON.parse(saved) : [];
+        } catch (e) {
+            console.error("Failed to parse graphData from localStorage:", e);
+            return [];
+        }
     });
 
     useEffect(() => {
@@ -82,17 +87,65 @@ function App() {
         }
     };
 
+    const toggleCo2 = async () => {
+        const newVal = !status.co2;
+        // Optimistic update
+        setStatus(prev => prev ? { ...prev, co2: newVal, isManual: true } : null);
+        try {
+            await axios.post('/api/co2', { value: newVal, manual: true });
+        } catch (error) {
+            console.error("Error toggling CO2:", error);
+        }
+    };
+
+    const toggleFan = async () => {
+        const newVal = !status.fan;
+        setStatus(prev => prev ? { ...prev, fan: newVal, isManual: true } : null);
+        try {
+            await axios.post('/api/fan', { value: newVal, manual: true });
+        } catch (error) {
+            console.error("Error toggling Fan:", error);
+        }
+    };
+
     if (!status) return <div className="p-10">Loading...</div>;
+
+    const styles = `
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        @keyframes pulse {
+            0% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.2); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+        .spin { animation: spin 2s linear infinite; }
+        .pulse { animation: pulse 1.5s ease-in-out infinite; }
+    `;
 
     return (
         <div style={{ padding: '10px', fontFamily: 'Arial, sans-serif', maxWidth: '800px', margin: '0 auto' }}>
-            <h1 style={{ textAlign: 'center', fontSize: '1.5rem', marginBottom: '20px' }}>Aquarium Controller</h1>
+            <style>{styles}</style>
+            <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+                <h1 style={{ fontSize: '1.5rem', margin: '0 0 10px 0' }}>Aquarium Controller</h1>
+                <span style={{
+                    padding: '5px 10px',
+                    borderRadius: '15px',
+                    backgroundColor: status.isManual ? '#ff9800' : '#4caf50',
+                    color: 'white',
+                    fontWeight: 'bold',
+                    fontSize: '0.9rem'
+                }}>
+                    {status.isManual ? "Manual Mode" : "Auto Mode"}
+                </span>
+            </div>
 
             <div style={{ display: 'flex', gap: '10px', marginBottom: '20px', flexWrap: 'wrap', justifyContent: 'center' }}>
                 <StatusCard title="Water Temp" value={`${status.waterTemp} °C`} color={status.waterTemp > 28 ? 'red' : 'blue'} />
                 <StatusCard title="CPU Temp" value={`${status.cpuTemp} °C`} />
-                <StatusCard title="CO2 Relay" value={status.co2 ? "ON" : "OFF"} color={status.co2 ? 'green' : 'gray'} />
-                <StatusCard title="Cooling Fan" value={status.fan ? "ON" : "OFF"} color={status.fan ? 'green' : 'gray'} />
+                <StatusCard title="CO2 Relay" value={status.co2 ? "ON" : "OFF"} color={status.co2 ? 'green' : 'gray'} onClick={toggleCo2} icon="🫧" animation={status.co2 ? "pulse" : ""} />
+                <StatusCard title="Cooling Fan" value={status.fan ? "ON" : "OFF"} color={status.fan ? 'green' : 'gray'} onClick={toggleFan} icon="🌀" animation={status.fan ? "spin" : ""} />
                 <StatusCard title="LED Brightness" value={`${status.led.toFixed(2)}%`} />
             </div>
 
@@ -135,17 +188,21 @@ function App() {
     );
 }
 
-const StatusCard = ({ title, value, color = 'black' }: { title: string, value: string, color?: string }) => (
-    <div style={{
+const StatusCard = ({ title, value, color = 'black', onClick, icon, animation }: { title: string, value: string, color?: string, onClick?: () => void, icon?: string, animation?: string }) => (
+    <div onClick={onClick} style={{
         border: '1px solid #ddd',
         borderRadius: '8px',
         padding: '10px',
         flex: '1 1 140px',
         textAlign: 'center',
-        boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+        boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+        cursor: onClick ? 'pointer' : 'default'
     }}>
         <div style={{ fontSize: '12px', color: '#666', marginBottom: '5px' }}>{title}</div>
-        <div style={{ fontSize: '20px', fontWeight: 'bold', color: color }}>{value}</div>
+        <div style={{ fontSize: '20px', fontWeight: 'bold', color: color, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px' }}>
+            {icon && <span className={animation} style={{ display: 'inline-block' }}>{icon}</span>}
+            <span>{value}</span>
+        </div>
     </div>
 );
 
