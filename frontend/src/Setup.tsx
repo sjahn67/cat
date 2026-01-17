@@ -30,6 +30,12 @@ export default function Setup({ onBack, darkMode }: SetupProps) {
     const [cpuFanConfig, setCpuFanConfig] = useState<CpuFanConfig>({ startTemp: 45, endTemp: 70 });
     const [systemInterval, setSystemInterval] = useState<number>(5000);
     const [loading, setLoading] = useState(true);
+    const [currentTime, setCurrentTime] = useState(new Date());
+
+    useEffect(() => {
+        const timer = setInterval(() => setCurrentTime(new Date()), 1000);
+        return () => clearInterval(timer);
+    }, []);
 
     useEffect(() => {
         const loadAll = async () => {
@@ -185,6 +191,7 @@ export default function Setup({ onBack, darkMode }: SetupProps) {
         <div style={{ padding: '20px', maxWidth: '800px', margin: '0 auto', fontFamily: 'Arial, sans-serif', backgroundColor: theme.bg, color: theme.text, minHeight: '100vh', transition: 'background-color 0.3s, color 0.3s' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
                 <h2>Schedule Setup</h2>
+                <div style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>{currentTime.toLocaleTimeString()}</div>
                 <button onClick={onBack} style={{ padding: '8px 16px', cursor: 'pointer' }}>Back to Dashboard</button>
             </div>
 

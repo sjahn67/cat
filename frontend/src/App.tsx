@@ -39,6 +39,13 @@ function App() {
         }
     });
 
+    const [currentTime, setCurrentTime] = useState(new Date());
+
+    useEffect(() => {
+        const timer = setInterval(() => setCurrentTime(new Date()), 1000);
+        return () => clearInterval(timer);
+    }, []);
+
     useEffect(() => {
         localStorage.setItem('graphData', JSON.stringify(graphData));
     }, [graphData]);
@@ -187,6 +194,9 @@ function App() {
                     title="Setup"
                 >
                     ⚙️
+                </div>
+                <div style={{ fontSize: '1.2rem', marginBottom: '10px', fontWeight: 'bold' }}>
+                    {currentTime.toLocaleTimeString()}
                 </div>
                 <span style={{
                     padding: '5px 10px',
