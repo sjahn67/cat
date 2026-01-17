@@ -29,15 +29,7 @@ function App() {
         const saved = localStorage.getItem('darkMode');
         return saved ? JSON.parse(saved) : false;
     });
-    const [graphData, setGraphData] = useState<GraphData[]>(() => {
-        try {
-            const saved = localStorage.getItem('graphData');
-            return saved ? JSON.parse(saved) : [];
-        } catch (e) {
-            console.error("Failed to parse graphData from localStorage:", e);
-            return [];
-        }
-    });
+    const [graphData, setGraphData] = useState<GraphData[]>([]);
 
     const [currentTime, setCurrentTime] = useState(new Date());
 
@@ -47,8 +39,19 @@ function App() {
     }, []);
 
     useEffect(() => {
-        localStorage.setItem('graphData', JSON.stringify(graphData));
-    }, [graphData]);
+        axios.get('/api/history')
+            .then(res => {
+                const formattedData = res.data.map((item: any) => {
+                    if (!item.time && item.timestamp) {
+                        const d = new Date(item.timestamp);
+                        return { ...item, time: `${d.getHours()}:${String(d.getMinutes()).padStart(2, '0')}:${String(d.getSeconds()).padStart(2, '0')}` };
+                    }
+                    return item;
+                });
+                setGraphData(formattedData);
+            })
+            .catch(err => console.error("Failed to fetch history:", err));
+    }, []);
 
     useEffect(() => {
         localStorage.setItem('darkMode', JSON.stringify(darkMode));
