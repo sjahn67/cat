@@ -21,9 +21,10 @@ interface CpuFanConfig {
 
 interface SetupProps {
     onBack: () => void;
+    darkMode: boolean;
 }
 
-export default function Setup({ onBack }: SetupProps) {
+export default function Setup({ onBack, darkMode }: SetupProps) {
     const [schedule, setSchedule] = useState<ScheduleItem[]>([]);
     const [tempConfig, setTempConfig] = useState<TempConfig>({ startTemp: 0, endTemp: 0, enable: false });
     const [cpuFanConfig, setCpuFanConfig] = useState<CpuFanConfig>({ startTemp: 45, endTemp: 70 });
@@ -167,14 +168,27 @@ export default function Setup({ onBack }: SetupProps) {
 
     if (loading) return <div className="p-10">Loading...</div>;
 
+    const theme = {
+        bg: darkMode ? '#1a1a1a' : '#ffffff',
+        text: darkMode ? '#e0e0e0' : '#000000',
+        cardBg: darkMode ? '#2d2d2d' : '#f9f9f9',
+        borderColor: darkMode ? '#444' : '#ccc',
+        inputBg: darkMode ? '#333' : '#fff',
+        inputText: darkMode ? '#fff' : '#000',
+        tableHeaderBg: darkMode ? '#333' : '#f2f2f2',
+        tableBorder: darkMode ? '#444' : '#ddd',
+        chartGrid: darkMode ? '#444' : '#ccc',
+        chartText: darkMode ? '#aaa' : '#666',
+    };
+
     return (
-        <div style={{ padding: '20px', maxWidth: '800px', margin: '0 auto', fontFamily: 'Arial, sans-serif' }}>
+        <div style={{ padding: '20px', maxWidth: '800px', margin: '0 auto', fontFamily: 'Arial, sans-serif', backgroundColor: theme.bg, color: theme.text, minHeight: '100vh', transition: 'background-color 0.3s, color 0.3s' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
                 <h2>Schedule Setup</h2>
                 <button onClick={onBack} style={{ padding: '8px 16px', cursor: 'pointer' }}>Back to Dashboard</button>
             </div>
 
-            <div style={{ marginBottom: '20px', border: '1px solid #ccc', padding: '15px', borderRadius: '8px', backgroundColor: '#f9f9f9' }}>
+            <div style={{ marginBottom: '20px', border: `1px solid ${theme.borderColor}`, padding: '15px', borderRadius: '8px', backgroundColor: theme.cardBg }}>
                 <h3 style={{ marginTop: 0 }}>Temperature Control</h3>
                 <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap', alignItems: 'flex-end' }}>
                     <div>
@@ -184,7 +198,7 @@ export default function Setup({ onBack }: SetupProps) {
                             step="0.1"
                             value={tempConfig.startTemp}
                             onChange={(e) => setTempConfig({ ...tempConfig, startTemp: Number(e.target.value) })}
-                            style={{ padding: '5px', width: '80px' }}
+                            style={{ padding: '5px', width: '80px', backgroundColor: theme.inputBg, color: theme.inputText, border: `1px solid ${theme.borderColor}` }}
                         />
                     </div>
                     <div>
@@ -194,7 +208,7 @@ export default function Setup({ onBack }: SetupProps) {
                             step="0.1"
                             value={tempConfig.endTemp}
                             onChange={(e) => setTempConfig({ ...tempConfig, endTemp: Number(e.target.value) })}
-                            style={{ padding: '5px', width: '80px' }}
+                            style={{ padding: '5px', width: '80px', backgroundColor: theme.inputBg, color: theme.inputText, border: `1px solid ${theme.borderColor}` }}
                         />
                     </div>
                     <div style={{ paddingBottom: '8px' }}>
@@ -216,7 +230,7 @@ export default function Setup({ onBack }: SetupProps) {
                 </div>
             </div>
 
-            <div style={{ marginBottom: '20px', border: '1px solid #ccc', padding: '15px', borderRadius: '8px', backgroundColor: '#f9f9f9' }}>
+            <div style={{ marginBottom: '20px', border: `1px solid ${theme.borderColor}`, padding: '15px', borderRadius: '8px', backgroundColor: theme.cardBg }}>
                 <h3 style={{ marginTop: 0 }}>CPU Fan Control (PWM)</h3>
                 <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap', alignItems: 'flex-end' }}>
                     <div>
@@ -226,7 +240,7 @@ export default function Setup({ onBack }: SetupProps) {
                             type="number"
                             value={cpuFanConfig.startTemp}
                             onChange={(e) => setCpuFanConfig({ ...cpuFanConfig, startTemp: Number(e.target.value) })}
-                            style={{ padding: '5px', width: '80px', display: 'block', marginTop: '5px' }}
+                            style={{ padding: '5px', width: '80px', display: 'block', marginTop: '5px', backgroundColor: theme.inputBg, color: theme.inputText, border: `1px solid ${theme.borderColor}` }}
                         />
                     </div>
                     <div>
@@ -236,7 +250,7 @@ export default function Setup({ onBack }: SetupProps) {
                             type="number"
                             value={cpuFanConfig.endTemp}
                             onChange={(e) => setCpuFanConfig({ ...cpuFanConfig, endTemp: Number(e.target.value) })}
-                            style={{ padding: '5px', width: '80px', display: 'block', marginTop: '5px' }}
+                            style={{ padding: '5px', width: '80px', display: 'block', marginTop: '5px', backgroundColor: theme.inputBg, color: theme.inputText, border: `1px solid ${theme.borderColor}` }}
                         />
                     </div>
                     <div>
@@ -247,7 +261,7 @@ export default function Setup({ onBack }: SetupProps) {
                 </div>
             </div>
 
-            <div style={{ marginBottom: '20px', border: '1px solid #ccc', padding: '15px', borderRadius: '8px', backgroundColor: '#f9f9f9' }}>
+            <div style={{ marginBottom: '20px', border: `1px solid ${theme.borderColor}`, padding: '15px', borderRadius: '8px', backgroundColor: theme.cardBg }}>
                 <h3 style={{ marginTop: 0 }}>System Settings</h3>
                 <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap', alignItems: 'flex-end' }}>
                     <div>
@@ -256,7 +270,7 @@ export default function Setup({ onBack }: SetupProps) {
                             type="number"
                             value={systemInterval}
                             onChange={(e) => setSystemInterval(Number(e.target.value))}
-                            style={{ padding: '5px', width: '100px' }}
+                            style={{ padding: '5px', width: '100px', backgroundColor: theme.inputBg, color: theme.inputText, border: `1px solid ${theme.borderColor}` }}
                         />
                     </div>
                     <div>
@@ -270,36 +284,36 @@ export default function Setup({ onBack }: SetupProps) {
             <div style={{ overflowX: 'auto' }}>
                 <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '20px' }}>
                     <thead>
-                        <tr style={{ backgroundColor: '#f2f2f2', textAlign: 'left' }}>
-                            <th style={{ padding: '10px', borderBottom: '1px solid #ddd' }}>Time (HHMM)</th>
-                            <th style={{ padding: '10px', borderBottom: '1px solid #ddd' }}>LED (%)</th>
-                            <th style={{ padding: '10px', borderBottom: '1px solid #ddd' }}>CO2</th>
-                            <th style={{ padding: '10px', borderBottom: '1px solid #ddd' }}>Action</th>
+                        <tr style={{ backgroundColor: theme.tableHeaderBg, textAlign: 'left' }}>
+                            <th style={{ padding: '10px', borderBottom: `1px solid ${theme.tableBorder}` }}>Time (HHMM)</th>
+                            <th style={{ padding: '10px', borderBottom: `1px solid ${theme.tableBorder}` }}>LED (%)</th>
+                            <th style={{ padding: '10px', borderBottom: `1px solid ${theme.tableBorder}` }}>CO2</th>
+                            <th style={{ padding: '10px', borderBottom: `1px solid ${theme.tableBorder}` }}>Action</th>
                         </tr>
                     </thead>
                     <tbody>
                         {schedule.map((item, index) => (
                             <tr key={index}>
-                                <td style={{ padding: '10px', borderBottom: '1px solid #ddd' }}>
+                                <td style={{ padding: '10px', borderBottom: `1px solid ${theme.tableBorder}` }}>
                                     <input
                                         type="text"
                                         value={item.time}
                                         maxLength={4}
                                         onChange={(e) => handleChange(index, 'time', e.target.value)}
-                                        style={{ width: '80px', padding: '5px' }}
+                                        style={{ width: '80px', padding: '5px', backgroundColor: theme.inputBg, color: theme.inputText, border: `1px solid ${theme.borderColor}` }}
                                     />
                                 </td>
-                                <td style={{ padding: '10px', borderBottom: '1px solid #ddd' }}>
+                                <td style={{ padding: '10px', borderBottom: `1px solid ${theme.tableBorder}` }}>
                                     <input
                                         type="number"
                                         min="0"
                                         max="100"
                                         value={item.ledValue}
                                         onChange={(e) => handleChange(index, 'ledValue', Number(e.target.value))}
-                                        style={{ width: '80px', padding: '5px' }}
+                                        style={{ width: '80px', padding: '5px', backgroundColor: theme.inputBg, color: theme.inputText, border: `1px solid ${theme.borderColor}` }}
                                     />
                                 </td>
-                                <td style={{ padding: '10px', borderBottom: '1px solid #ddd' }}>
+                                <td style={{ padding: '10px', borderBottom: `1px solid ${theme.tableBorder}` }}>
                                     <input
                                         type="checkbox"
                                         checked={item.co2}
@@ -307,7 +321,7 @@ export default function Setup({ onBack }: SetupProps) {
                                         style={{ transform: 'scale(1.5)' }}
                                     />
                                 </td>
-                                <td style={{ padding: '10px', borderBottom: '1px solid #ddd' }}>
+                                <td style={{ padding: '10px', borderBottom: `1px solid ${theme.tableBorder}` }}>
                                     <button
                                         onClick={() => handleDelete(index)}
                                         style={{ backgroundColor: '#ff4444', color: 'white', border: 'none', padding: '5px 10px', borderRadius: '4px', cursor: 'pointer' }}
@@ -321,12 +335,12 @@ export default function Setup({ onBack }: SetupProps) {
                 </table>
             </div>
 
-            <div style={{ marginBottom: '20px', border: '1px solid #ccc', padding: '10px', borderRadius: '8px' }}>
+            <div style={{ marginBottom: '20px', border: `1px solid ${theme.borderColor}`, padding: '10px', borderRadius: '8px', backgroundColor: theme.cardBg }}>
                 <h3 style={{ marginTop: 0 }}>Schedule Preview</h3>
                 <div style={{ width: '100%', height: 300 }}>
                     <ResponsiveContainer>
                         <ComposedChart data={getGraphData()}>
-                            <CartesianGrid strokeDasharray="3 3" />
+                            <CartesianGrid strokeDasharray="3 3" stroke={theme.chartGrid} />
                             <XAxis
                                 dataKey="timeNum"
                                 type="number"
@@ -336,13 +350,15 @@ export default function Setup({ onBack }: SetupProps) {
                                     const m = tick % 60;
                                     return `${String(h).padStart(2, '0')}${String(m).padStart(2, '0')}`;
                                 }}
+                                stroke={theme.chartGrid}
+                                tick={{ fill: theme.chartText }}
                             />
-                            <YAxis domain={[0, 100]} />
+                            <YAxis domain={[0, 100]} stroke={theme.chartGrid} tick={{ fill: theme.chartText }} />
                             <Tooltip labelFormatter={(label) => {
                                 const h = Math.floor(label / 60);
                                 const m = label % 60;
                                 return `${String(h).padStart(2, '0')}${String(m).padStart(2, '0')}`;
-                            }} />
+                            }} contentStyle={{ backgroundColor: theme.cardBg, borderColor: theme.borderColor, color: theme.text }} />
                             <Legend />
                             <Area type="stepAfter" dataKey="co2Height" fill="#82ca9d" stroke="#82ca9d" fillOpacity={0.3} name="CO2 (ON/OFF)" />
                             <Line type="monotone" dataKey="ledValue" stroke="#8884d8" strokeWidth={2} name="LED %" />

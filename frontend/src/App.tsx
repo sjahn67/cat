@@ -25,6 +25,10 @@ function App() {
     const [timeRange, setTimeRange] = useState<'1h' | '6h' | '24h'>('1h');
     const [view, setView] = useState<'dashboard' | 'setup'>('dashboard');
     const [updateInterval, setUpdateInterval] = useState<number>(5000);
+    const [darkMode, setDarkMode] = useState<boolean>(() => {
+        const saved = localStorage.getItem('darkMode');
+        return saved ? JSON.parse(saved) : false;
+    });
     const [graphData, setGraphData] = useState<GraphData[]>(() => {
         try {
             const saved = localStorage.getItem('graphData');
@@ -38,6 +42,10 @@ function App() {
     useEffect(() => {
         localStorage.setItem('graphData', JSON.stringify(graphData));
     }, [graphData]);
+
+    useEffect(() => {
+        localStorage.setItem('darkMode', JSON.stringify(darkMode));
+    }, [darkMode]);
 
     useEffect(() => {
         axios.get('/api/config').then(res => {
@@ -132,7 +140,18 @@ function App() {
         return graphData.slice(-points);
     };
 
-    if (view === 'setup') return <Setup onBack={() => setView('dashboard')} />;
+    if (view === 'setup') return <Setup onBack={() => setView('dashboard')} darkMode={darkMode} />;
+
+    const theme = {
+        bg: darkMode ? '#1a1a1a' : '#ffffff',
+        text: darkMode ? '#e0e0e0' : '#000000',
+        cardBg: darkMode ? '#2d2d2d' : '#ffffff',
+        borderColor: darkMode ? '#444' : '#ccc',
+        inputBg: darkMode ? '#333' : '#fff',
+        inputText: darkMode ? '#fff' : '#000',
+        chartGrid: darkMode ? '#444' : '#ccc',
+        chartText: darkMode ? '#aaa' : '#666',
+    };
 
     if (!status) return <div className="p-10">Loading...</div>;
 
@@ -151,10 +170,17 @@ function App() {
     `;
 
     return (
-        <div style={{ padding: '10px', fontFamily: 'Arial, sans-serif', maxWidth: '800px', margin: '0 auto' }}>
+        <div style={{ padding: '10px', fontFamily: 'Arial, sans-serif', maxWidth: '800px', margin: '0 auto', backgroundColor: theme.bg, color: theme.text, minHeight: '100vh', transition: 'background-color 0.3s, color 0.3s' }}>
             <style>{styles}</style>
             <div style={{ textAlign: 'center', marginBottom: '20px', position: 'relative' }}>
                 <h1 style={{ fontSize: '1.5rem', margin: '0 0 10px 0' }}>Aquarium Controller</h1>
+                <div
+                    onClick={() => setDarkMode(!darkMode)}
+                    style={{ position: 'absolute', left: 0, top: 0, cursor: 'pointer', fontSize: '24px' }}
+                    title="Toggle Dark Mode"
+                >
+                    {darkMode ? '☀️' : '🌙'}
+                </div>
                 <div
                     onClick={() => setView('setup')}
                     style={{ position: 'absolute', right: 0, top: 0, cursor: 'pointer', fontSize: '24px' }}
@@ -175,15 +201,15 @@ function App() {
             </div>
 
             <div style={{ display: 'flex', gap: '10px', marginBottom: '20px', flexWrap: 'wrap', justifyContent: 'center' }}>
-                <StatusCard title="Water Temp" value={`${status.waterTemp} °C`} color={status.waterTemp > 28 ? 'red' : 'blue'} />
-                <StatusCard title="CPU Temp" value={`${status.cpuTemp} °C`} />
-                <StatusCard title="CO2 Relay" value={status.co2 ? "ON" : "OFF"} color={status.co2 ? 'green' : 'gray'} onClick={toggleCo2} icon="🫧" animation={status.co2 ? "pulse" : ""} />
-                <StatusCard title="Cooling Fan" value={status.fan ? "ON" : "OFF"} color={status.fan ? 'green' : 'gray'} onClick={toggleFan} icon="🌀" animation={status.fan ? "spin" : ""} />
-                <StatusCard title="CPU Fan Speed" value={`${status.cpuFanSpeed}%`} />
-                <StatusCard title="LED Brightness" value={`${status.led.toFixed(2)}%`} />
+                <StatusCard title="Water Temp" value={`${status.waterTemp} °C`} color={status.waterTemp > 28 ? 'red' : (darkMode ? '#4da6ff' : 'blue')} darkMode={darkMode} />
+                <StatusCard title="CPU Temp" value={`${status.cpuTemp} °C`} darkMode={darkMode} />
+                <StatusCard title="CO2 Relay" value={status.co2 ? "ON" : "OFF"} color={status.co2 ? 'green' : 'gray'} onClick={toggleCo2} icon="🫧" animation={status.co2 ? "pulse" : ""} darkMode={darkMode} />
+                <StatusCard title="Cooling Fan" value={status.fan ? "ON" : "OFF"} color={status.fan ? 'green' : 'gray'} onClick={toggleFan} icon="🌀" animation={status.fan ? "spin" : ""} darkMode={darkMode} />
+                <StatusCard title="CPU Fan Speed" value={`${status.cpuFanSpeed}%`} darkMode={darkMode} />
+                <StatusCard title="LED Brightness" value={`${status.led.toFixed(2)}%`} darkMode={darkMode} />
             </div>
 
-            <div style={{ border: '1px solid #ccc', padding: '15px', borderRadius: '8px', marginBottom: '20px' }}>
+            <div style={{ border: `1px solid ${theme.borderColor}`, padding: '15px', borderRadius: '8px', marginBottom: '20px', backgroundColor: theme.cardBg }}>
                 <h3 style={{ marginTop: 0 }}>LED Control</h3>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
                     <input
@@ -192,7 +218,7 @@ function App() {
                         max="100"
                         value={status.led}
                         onChange={handleLedChange}
-                        style={{ flex: '1 1 200px', width: '100%' }}
+                        style={{ flex: '1 1 200px', width: '100%', accentColor: darkMode ? '#8884d8' : undefined }}
                     />
                     <span style={{ minWidth: '60px', textAlign: 'right' }}>{status.led.toFixed(2)}%</span>
                     <button onClick={setAutoMode} disabled={!status.isManual} style={{ padding: '8px 12px', cursor: status.isManual ? 'pointer' : 'default', flex: '0 0 auto' }}>
@@ -201,15 +227,15 @@ function App() {
                 </div>
             </div>
 
-            <div style={{ border: '1px solid #ccc', padding: '10px', borderRadius: '8px' }}>
+            <div style={{ border: `1px solid ${theme.borderColor}`, padding: '10px', borderRadius: '8px', backgroundColor: theme.cardBg }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
                     <h3 style={{ margin: '0 0 0 5px' }}>History</h3>
                     <div style={{ display: 'flex', gap: '5px' }}>
                         {(['1h', '6h', '24h'] as const).map((range) => (
                             <button key={range} onClick={() => setTimeRange(range)} style={{
                                 padding: '5px 10px',
-                                backgroundColor: timeRange === range ? '#007bff' : '#f0f0f0',
-                                color: timeRange === range ? 'white' : 'black',
+                                backgroundColor: timeRange === range ? '#007bff' : (darkMode ? '#444' : '#f0f0f0'),
+                                color: timeRange === range ? 'white' : (darkMode ? '#e0e0e0' : 'black'),
                                 border: 'none',
                                 borderRadius: '4px',
                                 cursor: 'pointer',
@@ -221,11 +247,11 @@ function App() {
                 <div style={{ width: '100%', height: 300 }}>
                     <ResponsiveContainer>
                         <LineChart data={getFilteredData()} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
-                            <CartesianGrid strokeDasharray="3 3" />
-                            <XAxis dataKey="time" tick={{ fontSize: 12 }} />
-                            <YAxis yAxisId="left" orientation="left" width={40} tick={{ fontSize: 12 }} />
-                            <YAxis yAxisId="right" orientation="right" domain={[0, 100]} width={40} tick={{ fontSize: 12 }} />
-                            <Tooltip />
+                            <CartesianGrid strokeDasharray="3 3" stroke={theme.chartGrid} />
+                            <XAxis dataKey="time" tick={{ fontSize: 12, fill: theme.chartText }} stroke={theme.chartGrid} />
+                            <YAxis yAxisId="left" orientation="left" width={40} tick={{ fontSize: 12, fill: theme.chartText }} stroke={theme.chartGrid} />
+                            <YAxis yAxisId="right" orientation="right" domain={[0, 100]} width={40} tick={{ fontSize: 12, fill: theme.chartText }} stroke={theme.chartGrid} />
+                            <Tooltip contentStyle={{ backgroundColor: theme.cardBg, borderColor: theme.borderColor, color: theme.text }} />
                             <Line yAxisId="right" type="monotone" dataKey="led" stroke="#8884d8" strokeWidth={2} name="LED %" dot={false} />
                             <Line yAxisId="left" type="monotone" dataKey="waterTemp" stroke="#82ca9d" strokeWidth={2} name="Water °C" dot={false} />
                             <Line yAxisId="left" type="monotone" dataKey="cpuTemp" stroke="#ff7300" strokeWidth={2} name="CPU °C" dot={false} />
@@ -237,17 +263,19 @@ function App() {
     );
 }
 
-const StatusCard = ({ title, value, color = 'black', onClick, icon, animation }: { title: string, value: string, color?: string, onClick?: () => void, icon?: string, animation?: string }) => (
+const StatusCard = ({ title, value, color = 'black', onClick, icon, animation, darkMode }: { title: string, value: string, color?: string, onClick?: () => void, icon?: string, animation?: string, darkMode?: boolean }) => (
     <div onClick={onClick} style={{
-        border: '1px solid #ddd',
+        border: `1px solid ${darkMode ? '#444' : '#ddd'}`,
         borderRadius: '8px',
         padding: '10px',
         flex: '1 1 140px',
         textAlign: 'center',
         boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-        cursor: onClick ? 'pointer' : 'default'
+        cursor: onClick ? 'pointer' : 'default',
+        backgroundColor: darkMode ? '#2d2d2d' : '#fff',
+        color: darkMode ? '#e0e0e0' : '#000'
     }}>
-        <div style={{ fontSize: '12px', color: '#666', marginBottom: '5px' }}>{title}</div>
+        <div style={{ fontSize: '12px', color: darkMode ? '#aaa' : '#666', marginBottom: '5px' }}>{title}</div>
         <div style={{ fontSize: '20px', fontWeight: 'bold', color: color, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px' }}>
             {icon && <span className={animation} style={{ display: 'inline-block' }}>{icon}</span>}
             <span>{value}</span>
