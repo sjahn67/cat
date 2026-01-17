@@ -201,8 +201,8 @@ function App() {
             </div>
 
             <div style={{ display: 'flex', gap: '10px', marginBottom: '20px', flexWrap: 'wrap', justifyContent: 'center' }}>
-                <StatusCard title="Water Temp" value={`${status.waterTemp} °C`} color={status.waterTemp > 28 ? 'red' : (darkMode ? '#4da6ff' : 'blue')} darkMode={darkMode} />
-                <StatusCard title="CPU Temp" value={`${status.cpuTemp} °C`} darkMode={darkMode} />
+                <StatusCard title="Water Temp" value={`${status.waterTemp.toFixed(1)} °C`} color={status.waterTemp > 28 ? 'red' : (darkMode ? '#4da6ff' : 'blue')} darkMode={darkMode} />
+                <StatusCard title="CPU Temp" value={`${status.cpuTemp.toFixed(1)} °C`} darkMode={darkMode} />
                 <StatusCard title="CO2 Relay" value={status.co2 ? "ON" : "OFF"} color={status.co2 ? 'green' : 'gray'} onClick={toggleCo2} icon="🫧" animation={status.co2 ? "pulse" : ""} darkMode={darkMode} />
                 <StatusCard title="Cooling Fan" value={status.fan ? "ON" : "OFF"} color={status.fan ? 'green' : 'gray'} onClick={toggleFan} icon="🌀" animation={status.fan ? "spin" : ""} darkMode={darkMode} />
                 <StatusCard title="CPU Fan Speed" value={`${status.cpuFanSpeed}%`} darkMode={darkMode} />
