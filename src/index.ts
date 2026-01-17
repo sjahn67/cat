@@ -160,10 +160,10 @@ async function updateSystem() {
         console.error("Error reading Water temp:", e);
     }
 
-    console.log(`...curValue-> led: ${prevLedValue}%, Co2: ${prevCo2Value}`);
-    console.log(`...newValue-> led: ${newValue.ledValue}%, Co2: ${newValue.co2}`);
-    console.log(`...CPU Temp: ${curTemp} degC`);
-    console.log(`...Water Temp: ${tempC} degC`);
+    // console.log(`...curValue-> led: ${prevLedValue}%, Co2: ${prevCo2Value}`);
+    // console.log(`...newValue-> led: ${newValue.ledValue}%, Co2: ${newValue.co2}`);
+    // console.log(`...CPU Temp: ${curTemp} degC`);
+    // console.log(`...Water Temp: ${tempC} degC`);
 
     // Update Global Status for Web
     systemStatus = {
