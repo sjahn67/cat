@@ -187,7 +187,7 @@ async function updateSystem() {
             myCo2.setRelay(newValue.co2);
         }
         if (Cat.ProgramConfig.tempControl.enable) {
-            console.log(`...Cooling Fan status:${CoolingFan.getValue() ? "ON" : "OFF"}`);
+            // console.log(`...Cooling Fan status:${CoolingFan.getValue() ? "ON" : "OFF"}`);
             if (tempC >= Cat.ProgramConfig.tempControl.startTemp && !CoolingFan.getValue()) {
                 console.log("...Set cooling Fan ON");
                 CoolingFan.setRelay(true);
