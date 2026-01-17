@@ -147,7 +147,14 @@ function App() {
             case '6h': points = 6 * 60 * pointsPerMinute; break;
             case '24h': points = 24 * 60 * pointsPerMinute; break;
         }
-        return graphData.slice(-points);
+        const data = graphData.slice(-points);
+
+        // Downsampling: 데이터가 너무 많을 경우 샘플링하여 렌더링 성능 최적화
+        const maxPoints = 300;
+        if (data.length <= maxPoints) return data;
+
+        const step = Math.ceil(data.length / maxPoints);
+        return data.filter((_, index) => index % step === 0);
     };
 
     if (view === 'setup') return <Setup onBack={() => setView('dashboard')} darkMode={darkMode} />;

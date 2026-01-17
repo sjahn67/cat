@@ -1,5 +1,5 @@
 import { Cat } from "./globals";
-import { NODE_ENV, NodeEnvTypes } from "./constants";
+import { NODE_ENV, NodeEnvTypes, DB_DIR_PATH } from "./constants";
 import { HwPwms, RelayChannels } from "./raspPi4B-hw";
 
 import { ledClass } from "./modules/led";
@@ -13,6 +13,7 @@ import express from "express";
 import cors from "cors";
 import path from "path";
 import { saveProgramConfig } from "./database/file-database";
+import { promises as fs } from "fs";
 
 const myLed = new ledClass(Cat.ProgramConfig.led.pwmNum, Cat.ProgramConfig.led.curFrequence);
 const myCpuFan = new fanClass(Cat.ProgramConfig.fan.pwmNum, Cat.ProgramConfig.fan.curFrequence);
@@ -36,12 +37,25 @@ let systemStatus = {
     cpuFanSpeed: 0
 };
 
+// History Data Storage (In-memory)
+interface HistoryItem {
+    timestamp: number;
+    led: number;
+    cpuTemp: number;
+    waterTemp: number;
+}
+const historyData: HistoryItem[] = [];
+
 app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, "../frontend/dist"))); // React 빌드 경로 (예시)
 
 app.get("/api/status", (req, res) => {
     res.json(systemStatus);
+});
+
+app.get("/api/history", (req, res) => {
+    res.json(historyData);
 });
 
 app.post("/api/led", (req, res) => {
@@ -176,6 +190,18 @@ async function updateSystem() {
         cpuFanSpeed: myCpuFan.getValue()
     };
 
+    // Save to History
+    historyData.push({
+        timestamp: Date.now(),
+        led: systemStatus.led,
+        cpuTemp: systemStatus.cpuTemp,
+        waterTemp: systemStatus.waterTemp
+    });
+
+    // Limit history size (approx. 24 hours at 5s interval = ~17280 points)
+    if (historyData.length > 20000) historyData.shift();
+    appendToHistory(historyData[historyData.length - 1]).catch(err => console.error("Failed to save history:", err));
+
     // Operate LED and CO2 based on the plan
     if (!isManualMode) {
         if (prevLedValue !== newValue.ledValue) {
@@ -211,7 +237,84 @@ async function updateSystem() {
     myCpuFan.setPwm(targetCpuFanSpeed);
 }
 
+function getHistoryFilename(date: Date): string {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return path.join(DB_DIR_PATH, `history_${year}-${month}-${day}.jsonl`);
+}
+
+async function loadHistory() {
+    try {
+        await fs.mkdir(DB_DIR_PATH, { recursive: true });
+
+        // Load yesterday and today to ensure continuity across midnight
+        const today = new Date();
+        const yesterday = new Date(today);
+        yesterday.setDate(yesterday.getDate() - 1);
+
+        const files = [getHistoryFilename(yesterday), getHistoryFilename(today)];
+
+        for (const file of files) {
+            try {
+                const data = await fs.readFile(file, 'utf-8');
+                const lines = data.split('\n');
+                for (const line of lines) {
+                    if (line.trim()) {
+                        try {
+                            historyData.push(JSON.parse(line));
+                        } catch (e) { /* ignore invalid lines */ }
+                    }
+                }
+            } catch (e: any) {
+                if (e.code !== 'ENOENT') console.error(`Failed to read history file ${file}:`, e);
+            }
+        }
+        if (historyData.length > 20000) historyData.splice(0, historyData.length - 20000);
+        console.log(`...Loaded ${historyData.length} history items.`);
+    } catch (e: any) {
+        console.error("Failed to load history:", e);
+    }
+}
+
+async function appendToHistory(item: HistoryItem) {
+    try {
+        const filename = getHistoryFilename(new Date(item.timestamp));
+        await fs.appendFile(filename, JSON.stringify(item) + '\n');
+    } catch (e) {
+        console.error("Failed to append history:", e);
+    }
+}
+
+async function cleanupOldHistory() {
+    try {
+        const files = await fs.readdir(DB_DIR_PATH);
+        const now = new Date();
+        const retentionDays = 30;
+
+        for (const file of files) {
+            if (file.startsWith('history_') && file.endsWith('.jsonl')) {
+                const match = file.match(/history_(\d{4}-\d{2}-\d{2})\.jsonl/);
+                if (match) {
+                    const fileDate = new Date(match[1]);
+                    const diffTime = now.getTime() - fileDate.getTime();
+                    const diffDays = diffTime / (1000 * 3600 * 24);
+
+                    if (diffDays > retentionDays) {
+                        await fs.unlink(path.join(DB_DIR_PATH, file));
+                        console.log(`...Deleted old history file: ${file}`);
+                    }
+                }
+            }
+        }
+    } catch (e: any) {
+        if (e.code !== 'ENOENT') console.error("Failed to cleanup old history:", e);
+    }
+}
+
 async function main() {
+    await loadHistory();
+    await cleanupOldHistory();
     myCo2.setRelay(false);
     CoolingFan.setRelay(false);
     try {
