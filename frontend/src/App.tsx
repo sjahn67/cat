@@ -179,37 +179,39 @@ function App() {
     return (
         <div style={{ padding: '10px', fontFamily: 'Arial, sans-serif', maxWidth: '800px', margin: '0 auto', backgroundColor: theme.bg, color: theme.text, minHeight: '100vh', transition: 'background-color 0.3s, color 0.3s' }}>
             <style>{styles}</style>
-            <div style={{ textAlign: 'center', marginBottom: '20px', position: 'relative' }}>
+            <div style={{ textAlign: 'center', marginBottom: '20px' }}>
                 <h1 style={{ fontSize: '1.5rem', margin: '0 0 10px 0' }}>Aquarium Controller</h1>
-                <div style={{ position: 'absolute', left: 0, top: 0, display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <div
-                        onClick={() => setDarkMode(!darkMode)}
-                        style={{ cursor: 'pointer', fontSize: '24px' }}
-                        title="Toggle Dark Mode"
-                    >
-                        {darkMode ? '☀️' : '🌙'}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <div
+                            onClick={() => setDarkMode(!darkMode)}
+                            style={{ cursor: 'pointer', fontSize: '24px' }}
+                            title="Toggle Dark Mode"
+                        >
+                            {darkMode ? '☀️' : '🌙'}
+                        </div>
+                        <span style={{
+                            padding: '5px 10px',
+                            borderRadius: '15px',
+                            backgroundColor: status.isManual ? '#ff9800' : '#4caf50',
+                            color: 'white',
+                            fontWeight: 'bold',
+                            fontSize: '0.9rem'
+                        }}>
+                            {status.isManual ? "Manual Mode" : "Auto Mode"}
+                        </span>
                     </div>
-                    <span style={{
-                        padding: '5px 10px',
-                        borderRadius: '15px',
-                        backgroundColor: status.isManual ? '#ff9800' : '#4caf50',
-                        color: 'white',
-                        fontWeight: 'bold',
-                        fontSize: '0.9rem'
-                    }}>
-                        {status.isManual ? "Manual Mode" : "Auto Mode"}
-                    </span>
-                </div>
-                <div style={{ position: 'absolute', right: 0, top: 0, display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <div style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>
-                        {currentTime.toLocaleTimeString()}
-                    </div>
-                    <div
-                        onClick={() => setView('setup')}
-                        style={{ cursor: 'pointer', fontSize: '24px' }}
-                        title="Setup"
-                    >
-                        ⚙️
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <div style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>
+                            {currentTime.toLocaleTimeString()}
+                        </div>
+                        <div
+                            onClick={() => setView('setup')}
+                            style={{ cursor: 'pointer', fontSize: '24px' }}
+                            title="Setup"
+                        >
+                            ⚙️
+                        </div>
                     </div>
                 </div>
             </div>
