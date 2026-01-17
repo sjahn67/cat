@@ -2,7 +2,7 @@ import { HwPwms, RelayChannels } from "../raspPi4B-hw"
 import { IProgramConfig } from "../interfaces/interface-program-config"
 
 export const programConfigDef: IProgramConfig = {
-  version: 1,
+  version: 2,
   name: "Seongjin's Cat",
   led: {
     pwmNum: HwPwms.PWM0_2,
@@ -33,5 +33,6 @@ export const programConfigDef: IProgramConfig = {
   cpuFanControl: {
     startTemp: 45,
     endTemp: 70
-  }
+  },
+  systemUpdateInterval: 5000
 }

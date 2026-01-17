@@ -12,6 +12,7 @@ import { periodicCheck } from "./etc";
 import express from "express";
 import cors from "cors";
 import path from "path";
+import { saveProgramConfig } from "./database/file-database";
 
 const myLed = new ledClass(Cat.ProgramConfig.led.pwmNum, Cat.ProgramConfig.led.curFrequence);
 const myCpuFan = new fanClass(Cat.ProgramConfig.fan.pwmNum, Cat.ProgramConfig.fan.curFrequence);
@@ -106,6 +107,14 @@ app.post("/api/config/cpu-fan", (req, res) => {
     if (startTemp !== undefined) Cat.ProgramConfig.cpuFanControl.startTemp = Number(startTemp);
     if (endTemp !== undefined) Cat.ProgramConfig.cpuFanControl.endTemp = Number(endTemp);
     console.log(`...Updated CPU Fan Control: Start=${Cat.ProgramConfig.cpuFanControl.startTemp}, End=${Cat.ProgramConfig.cpuFanControl.endTemp}`);
+    res.json({ success: true });
+});
+
+app.post("/api/config/system", (req, res) => {
+    const { updateInterval } = req.body;
+    if (updateInterval !== undefined) Cat.ProgramConfig.systemUpdateInterval = Number(updateInterval);
+    saveProgramConfig(Cat.ProgramConfig);
+    console.log(`...Updated System Config: Interval=${Cat.ProgramConfig.systemUpdateInterval}`);
     res.json({ success: true });
 });
 
@@ -216,7 +225,7 @@ async function main() {
         } catch (e) {
             console.error("Error in periodic check:", e);
         }
-    }, 5000);
+    }, () => Cat.ProgramConfig.systemUpdateInterval || 5000);
 
     app.listen(PORT, () => {
         console.log(`Web Server running on http://localhost:${PORT}`);

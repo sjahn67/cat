@@ -27,6 +27,7 @@ export default function Setup({ onBack }: SetupProps) {
     const [schedule, setSchedule] = useState<ScheduleItem[]>([]);
     const [tempConfig, setTempConfig] = useState<TempConfig>({ startTemp: 0, endTemp: 0, enable: false });
     const [cpuFanConfig, setCpuFanConfig] = useState<CpuFanConfig>({ startTemp: 45, endTemp: 70 });
+    const [systemInterval, setSystemInterval] = useState<number>(5000);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -63,6 +64,9 @@ export default function Setup({ onBack }: SetupProps) {
                     endTemp: res.data.cpuFanControl.endTemp
                 });
             }
+            if (res.data && res.data.systemUpdateInterval) {
+                setSystemInterval(res.data.systemUpdateInterval);
+            }
         } catch (err) {
             console.error("Failed to fetch config", err);
         }
@@ -86,6 +90,17 @@ export default function Setup({ onBack }: SetupProps) {
         } catch (err: any) {
             console.error("Failed to save cpu fan config", err);
             const errorMessage = err.response?.data?.error || "Failed to save CPU fan settings.";
+            alert(errorMessage);
+        }
+    };
+
+    const handleSystemSave = async () => {
+        try {
+            await axios.post('/api/config/system', { updateInterval: systemInterval });
+            alert("System settings saved!");
+        } catch (err: any) {
+            console.error("Failed to save system config", err);
+            const errorMessage = err.response?.data?.error || "Failed to save system settings.";
             alert(errorMessage);
         }
     };
@@ -227,6 +242,26 @@ export default function Setup({ onBack }: SetupProps) {
                     <div>
                         <button onClick={handleCpuFanSave} style={{ padding: '6px 12px', backgroundColor: '#008CBA', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
                             Save CPU Fan Settings
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div style={{ marginBottom: '20px', border: '1px solid #ccc', padding: '15px', borderRadius: '8px', backgroundColor: '#f9f9f9' }}>
+                <h3 style={{ marginTop: 0 }}>System Settings</h3>
+                <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap', alignItems: 'flex-end' }}>
+                    <div>
+                        <label style={{ display: 'block', marginBottom: '5px', fontSize: '14px' }}>Update Interval (ms)</label>
+                        <input
+                            type="number"
+                            value={systemInterval}
+                            onChange={(e) => setSystemInterval(Number(e.target.value))}
+                            style={{ padding: '5px', width: '100px' }}
+                        />
+                    </div>
+                    <div>
+                        <button onClick={handleSystemSave} style={{ padding: '6px 12px', backgroundColor: '#008CBA', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
+                            Save System Settings
                         </button>
                     </div>
                 </div>

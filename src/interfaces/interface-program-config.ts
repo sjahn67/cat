@@ -27,5 +27,6 @@ export interface IProgramConfig {
     cpuFanControl: {
         startTemp: number,
         endTemp: number
-    }
+    },
+    systemUpdateInterval: number
 }

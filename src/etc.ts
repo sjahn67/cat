@@ -6,9 +6,12 @@ export function showData(data: string): string {
 }
 
 // periodic status check function
-export async function periodicCheck(periodic: Function, period?: number) {
-  let time: number = period || 1000;
-  let wrapper = async function (periodic: Function, time: number) {
+export async function periodicCheck(periodic: Function, period?: number | (() => number)) {
+  const getTime = () => {
+    if (typeof period === 'function') return period();
+    return period || 1000;
+  };
+  let wrapper = async function (periodic: Function) {
 
     // winston.debug(`[Periodic ${periodic.name}] Begin`);
     try {
@@ -17,7 +20,7 @@ export async function periodicCheck(periodic: Function, period?: number) {
       console.error(e.stack);
     }
     // winston.debug(`[Periodic ${periodic.name}] End`);
-    setTimeout(wrapper, time, periodic, time);
+    setTimeout(wrapper, getTime(), periodic);
   };
-  wrapper(periodic, time);
+  wrapper(periodic);
 }
