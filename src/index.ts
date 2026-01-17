@@ -312,9 +312,22 @@ async function cleanupOldHistory() {
     }
 }
 
+function scheduleDailyCleanup() {
+    const now = new Date();
+    const nextMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 0, 0, 0);
+    const delay = nextMidnight.getTime() - now.getTime();
+
+    console.log(`...Scheduled next history cleanup in ${Math.round(delay / 60000)} minutes`);
+
+    setTimeout(async () => {
+        await cleanupOldHistory();
+        scheduleDailyCleanup();
+    }, delay);
+}
+
 async function main() {
     await loadHistory();
-    await cleanupOldHistory();
+    scheduleDailyCleanup();
     myCo2.setRelay(false);
     CoolingFan.setRelay(false);
     try {
