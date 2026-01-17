@@ -24,6 +24,7 @@ function App() {
     const [status, setStatus] = useState<SystemStatus | null>(null);
     const [timeRange, setTimeRange] = useState<'1h' | '6h' | '24h'>('1h');
     const [view, setView] = useState<'dashboard' | 'setup'>('dashboard');
+    const [updateInterval, setUpdateInterval] = useState<number>(5000);
     const [graphData, setGraphData] = useState<GraphData[]>(() => {
         try {
             const saved = localStorage.getItem('graphData');
@@ -37,6 +38,14 @@ function App() {
     useEffect(() => {
         localStorage.setItem('graphData', JSON.stringify(graphData));
     }, [graphData]);
+
+    useEffect(() => {
+        axios.get('/api/config').then(res => {
+            if (res.data?.systemUpdateInterval) {
+                setUpdateInterval(res.data.systemUpdateInterval);
+            }
+        }).catch(console.error);
+    }, []);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -56,8 +65,8 @@ function App() {
                         cpuTemp: data.cpuTemp,
                         waterTemp: data.waterTemp
                     }];
-                    // 최근 24시간 데이터 유지 (5초 간격 * 12회/분 * 60분 * 24시간 = 17280개)
-                    const MAX_DATA_POINTS = 17280;
+                    // 최근 24시간 데이터 유지
+                    const MAX_DATA_POINTS = (60000 / updateInterval) * 60 * 24;
                     if (newData.length > MAX_DATA_POINTS) return newData.slice(newData.length - MAX_DATA_POINTS);
                     return newData;
                 });
@@ -67,9 +76,9 @@ function App() {
         };
 
         fetchData();
-        const interval = setInterval(fetchData, 5000); // 5초마다 갱신
+        const interval = setInterval(fetchData, updateInterval);
         return () => clearInterval(interval);
-    }, []);
+    }, [updateInterval]);
 
     const handleLedChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const newVal = Number(e.target.value);
@@ -113,7 +122,7 @@ function App() {
     };
 
     const getFilteredData = () => {
-        const pointsPerMinute = 12; // 60s / 5s
+        const pointsPerMinute = 60000 / updateInterval;
         let points = 0;
         switch (timeRange) {
             case '1h': points = 60 * pointsPerMinute; break;
