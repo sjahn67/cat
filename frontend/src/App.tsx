@@ -263,7 +263,7 @@ function App() {
     );
 }
 
-const StatusCard = ({ title, value, color = 'black', onClick, icon, animation, darkMode }: { title: string, value: string, color?: string, onClick?: () => void, icon?: string, animation?: string, darkMode?: boolean }) => (
+const StatusCard = ({ title, value, color, onClick, icon, animation, darkMode }: { title: string, value: string, color?: string, onClick?: () => void, icon?: string, animation?: string, darkMode?: boolean }) => (
     <div onClick={onClick} style={{
         border: `1px solid ${darkMode ? '#444' : '#ddd'}`,
         borderRadius: '8px',
@@ -276,7 +276,7 @@ const StatusCard = ({ title, value, color = 'black', onClick, icon, animation, d
         color: darkMode ? '#e0e0e0' : '#000'
     }}>
         <div style={{ fontSize: '12px', color: darkMode ? '#aaa' : '#666', marginBottom: '5px' }}>{title}</div>
-        <div style={{ fontSize: '20px', fontWeight: 'bold', color: color, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px' }}>
+        <div style={{ fontSize: '20px', fontWeight: 'bold', color: color || (darkMode ? '#e0e0e0' : 'black'), display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px' }}>
             {icon && <span className={animation} style={{ display: 'inline-block' }}>{icon}</span>}
             <span>{value}</span>
         </div>

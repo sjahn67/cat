@@ -235,7 +235,7 @@ export default function Setup({ onBack, darkMode }: SetupProps) {
                 <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap', alignItems: 'flex-end' }}>
                     <div>
                         <label style={{ display: 'block', marginBottom: '5px', fontSize: '14px' }}>Start Temp (°C)</label>
-                        <span style={{ fontSize: '12px', color: '#666' }}>(0% speed below this)</span>
+                        <span style={{ fontSize: '12px', color: theme.chartText }}>(0% speed below this)</span>
                         <input
                             type="number"
                             value={cpuFanConfig.startTemp}
@@ -245,7 +245,7 @@ export default function Setup({ onBack, darkMode }: SetupProps) {
                     </div>
                     <div>
                         <label style={{ display: 'block', marginBottom: '5px', fontSize: '14px' }}>Full Speed Temp (°C)</label>
-                        <span style={{ fontSize: '12px', color: '#666' }}>(100% speed above this)</span>
+                        <span style={{ fontSize: '12px', color: theme.chartText }}>(100% speed above this)</span>
                         <input
                             type="number"
                             value={cpuFanConfig.endTemp}
