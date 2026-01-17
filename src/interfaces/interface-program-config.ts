@@ -23,5 +23,9 @@ export interface IProgramConfig {
         startTemp: number,
         endTemp: number,
         enable: boolean
+    },
+    cpuFanControl: {
+        startTemp: number,
+        endTemp: number
     }
 }

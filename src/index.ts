@@ -99,6 +99,16 @@ app.post("/api/config/temp", (req, res) => {
     res.json({ success: true });
 });
 
+app.post("/api/config/cpu-fan", (req, res) => {
+    const { startTemp, endTemp } = req.body;
+    if (!Cat.ProgramConfig.cpuFanControl) Cat.ProgramConfig.cpuFanControl = { startTemp: 45, endTemp: 70 };
+
+    if (startTemp !== undefined) Cat.ProgramConfig.cpuFanControl.startTemp = Number(startTemp);
+    if (endTemp !== undefined) Cat.ProgramConfig.cpuFanControl.endTemp = Number(endTemp);
+    console.log(`...Updated CPU Fan Control: Start=${Cat.ProgramConfig.cpuFanControl.startTemp}, End=${Cat.ProgramConfig.cpuFanControl.endTemp}`);
+    res.json({ success: true });
+});
+
 app.get("/api/schedule", (req, res) => {
     res.json(myPlan.getSchedule());
 });
@@ -181,8 +191,8 @@ async function updateSystem() {
 
     // CPU Fan Control (Independent of Manual Mode or add to manual if needed)
     // Simple linear control: 45°C -> 0%, 70°C -> 100%
-    const cpuStartTemp = 45;
-    const cpuFullTemp = 70;
+    const cpuStartTemp = Cat.ProgramConfig.cpuFanControl?.startTemp ?? 45;
+    const cpuFullTemp = Cat.ProgramConfig.cpuFanControl?.endTemp ?? 70;
     let targetCpuFanSpeed = 0;
 
     if (curTemp <= cpuStartTemp) targetCpuFanSpeed = 0;

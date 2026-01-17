@@ -14,6 +14,11 @@ interface TempConfig {
     enable: boolean;
 }
 
+interface CpuFanConfig {
+    startTemp: number;
+    endTemp: number;
+}
+
 interface SetupProps {
     onBack: () => void;
 }
@@ -21,6 +26,7 @@ interface SetupProps {
 export default function Setup({ onBack }: SetupProps) {
     const [schedule, setSchedule] = useState<ScheduleItem[]>([]);
     const [tempConfig, setTempConfig] = useState<TempConfig>({ startTemp: 0, endTemp: 0, enable: false });
+    const [cpuFanConfig, setCpuFanConfig] = useState<CpuFanConfig>({ startTemp: 45, endTemp: 70 });
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -51,6 +57,12 @@ export default function Setup({ onBack }: SetupProps) {
                     enable: res.data.tempControl.enable
                 });
             }
+            if (res.data && res.data.cpuFanControl) {
+                setCpuFanConfig({
+                    startTemp: res.data.cpuFanControl.startTemp,
+                    endTemp: res.data.cpuFanControl.endTemp
+                });
+            }
         } catch (err) {
             console.error("Failed to fetch config", err);
         }
@@ -63,6 +75,17 @@ export default function Setup({ onBack }: SetupProps) {
         } catch (err: any) {
             console.error("Failed to save temp config", err);
             const errorMessage = err.response?.data?.error || "Failed to save temperature settings.";
+            alert(errorMessage);
+        }
+    };
+
+    const handleCpuFanSave = async () => {
+        try {
+            await axios.post('/api/config/cpu-fan', cpuFanConfig);
+            alert("CPU Fan settings saved!");
+        } catch (err: any) {
+            console.error("Failed to save cpu fan config", err);
+            const errorMessage = err.response?.data?.error || "Failed to save CPU fan settings.";
             alert(errorMessage);
         }
     };
@@ -173,6 +196,37 @@ export default function Setup({ onBack }: SetupProps) {
                     <div>
                         <button onClick={handleTempSave} style={{ padding: '6px 12px', backgroundColor: '#008CBA', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
                             Save Temp Settings
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div style={{ marginBottom: '20px', border: '1px solid #ccc', padding: '15px', borderRadius: '8px', backgroundColor: '#f9f9f9' }}>
+                <h3 style={{ marginTop: 0 }}>CPU Fan Control (PWM)</h3>
+                <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap', alignItems: 'flex-end' }}>
+                    <div>
+                        <label style={{ display: 'block', marginBottom: '5px', fontSize: '14px' }}>Start Temp (°C)</label>
+                        <span style={{ fontSize: '12px', color: '#666' }}>(0% speed below this)</span>
+                        <input
+                            type="number"
+                            value={cpuFanConfig.startTemp}
+                            onChange={(e) => setCpuFanConfig({ ...cpuFanConfig, startTemp: Number(e.target.value) })}
+                            style={{ padding: '5px', width: '80px', display: 'block', marginTop: '5px' }}
+                        />
+                    </div>
+                    <div>
+                        <label style={{ display: 'block', marginBottom: '5px', fontSize: '14px' }}>Full Speed Temp (°C)</label>
+                        <span style={{ fontSize: '12px', color: '#666' }}>(100% speed above this)</span>
+                        <input
+                            type="number"
+                            value={cpuFanConfig.endTemp}
+                            onChange={(e) => setCpuFanConfig({ ...cpuFanConfig, endTemp: Number(e.target.value) })}
+                            style={{ padding: '5px', width: '80px', display: 'block', marginTop: '5px' }}
+                        />
+                    </div>
+                    <div>
+                        <button onClick={handleCpuFanSave} style={{ padding: '6px 12px', backgroundColor: '#008CBA', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
+                            Save CPU Fan Settings
                         </button>
                     </div>
                 </div>

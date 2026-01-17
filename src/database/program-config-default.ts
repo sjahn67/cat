@@ -29,6 +29,9 @@ export const programConfigDef: IProgramConfig = {
     startTemp: 27,
     endTemp: 26.5,
     enable: true
+  },
+  cpuFanControl: {
+    startTemp: 45,
+    endTemp: 70
   }
-
 }
