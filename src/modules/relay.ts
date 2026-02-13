@@ -2,7 +2,7 @@ import { Cat } from "../globals";
 import { NODE_ENV, NodeEnvTypes } from "../constants";
 import { RelayChannels, RelayModes } from "../raspPi4B-hw";
 import * as GPIO from "pigpio";
-import * as GPIO_MOCK from  "pigpio-mock";
+import * as GPIO_MOCK from "pigpio-mock";
 const Gpio: GPIO.Gpio | GPIO_MOCK.Gpio = (NODE_ENV === NodeEnvTypes.NODE_ENV_DEV) ? GPIO_MOCK.Gpio : GPIO.Gpio;
 
 export class relayClass {

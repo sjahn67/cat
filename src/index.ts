@@ -14,6 +14,7 @@ import cors from "cors";
 import path from "path";
 import { saveProgramConfig } from "./database/file-database";
 import { promises as fs } from "fs";
+import { DHTSensor, DHTType } from "./modules/dht";
 
 const myLed = new ledClass(Cat.ProgramConfig.led.pwmNum, Cat.ProgramConfig.led.curFrequence);
 const myCpuFan = new fanClass(Cat.ProgramConfig.fan.pwmNum, Cat.ProgramConfig.fan.curFrequence);
@@ -45,6 +46,7 @@ interface HistoryItem {
     waterTemp: number;
 }
 const historyData: HistoryItem[] = [];
+const waterTempSensor = new DHTSensor(DHTType.DHT11, 4);
 
 app.use(cors());
 app.use(express.json());
@@ -195,7 +197,7 @@ async function updateSystem() {
         timestamp: Date.now(),
         led: systemStatus.led,
         cpuTemp: systemStatus.cpuTemp,
-        waterTemp: systemStatus.waterTemp
+        waterTemp: systemStatus.waterTemp || 0
     });
 
     // Limit history size (approx. 24 hours at 5s interval = ~17280 points)
