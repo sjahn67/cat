@@ -1,5 +1,5 @@
-import * as SPI from 'pi-spi';
-const rpio = require('rpio');
+import SPI from 'pi-spi';
+import * as  rpio from 'rpio';
 
 class SH1107Display {
     private spi: SPI.SPI;
