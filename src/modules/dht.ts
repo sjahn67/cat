@@ -23,7 +23,7 @@ export class DHTSensor {
     public async readSensorData(): Promise<SensorData | null> {
         try {
             // 라이브러리의 promises 모듈을 사용하여 비동기로 읽기
-            console.log(`DHT 센서에서 데이터 읽기 시도 (GPIO 핀: ${this.gpioPin}, 타입: DHT${this.sensorType})...`);
+            // console.log(`DHT 센서에서 데이터 읽기 시도 (GPIO 핀: ${this.gpioPin}, 타입: DHT${this.sensorType})...`);
             const res = await dht.promises.read(this.sensorType, this.gpioPin);
 
             // 소수점 둘째 자리까지 반올림
@@ -32,10 +32,10 @@ export class DHTSensor {
                 humidity: parseFloat(res.humidity.toFixed(2)),
             };
 
-            console.log(`------------------------------`);
-            console.log(`[${new Date().toLocaleTimeString()}] 센서 데이터 수신:`);
-            console.log(`🌡️  온도: ${data.temperature}°C`);
-            console.log(`💧 습도: ${data.humidity}%`);
+            // console.log(`------------------------------`);
+            // console.log(`[${new Date().toLocaleTimeString()}] 센서 데이터 수신:`);
+            // console.log(`🌡️  온도: ${data.temperature}°C`);
+            // console.log(`💧 습도: ${data.humidity}%`);
             return data;
 
         } catch (err) {

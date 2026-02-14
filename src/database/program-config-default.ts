@@ -1,5 +1,6 @@
 import { HwPwms, RelayChannels } from "../raspPi4B-hw"
 import { IProgramConfig } from "../interfaces/interface-program-config"
+import { DHTType } from "../modules/dht"
 
 export const programConfigDef: IProgramConfig = {
   version: 2,
@@ -33,6 +34,10 @@ export const programConfigDef: IProgramConfig = {
   cpuFanControl: {
     startTemp: 45,
     endTemp: 70
+  },
+  airTempSensor: {
+    sensorType: DHTType.DHT22,
+    gpio: 22
   },
   systemUpdateInterval: 5000
 }

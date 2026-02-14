@@ -1,3 +1,4 @@
+import { DHTType } from "../modules/dht";
 import { HwPwms, RelayChannels } from "../raspPi4B-hw";
 
 export interface IHwPwmConfig {
@@ -28,5 +29,9 @@ export interface IProgramConfig {
         startTemp: number,
         endTemp: number
     },
-    systemUpdateInterval: number
+    systemUpdateInterval: number,
+    airTempSensor: {
+        sensorType: DHTType;
+        gpio: number;
+    }
 }

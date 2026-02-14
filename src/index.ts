@@ -15,92 +15,67 @@ import path from "path";
 import { saveProgramConfig } from "./database/file-database";
 import { promises as fs } from "fs";
 import { DHTSensor, DHTType } from "./modules/dht";
+import { MainClass } from "./mainClass";
 
-const myLed = new ledClass(Cat.ProgramConfig.led.pwmNum, Cat.ProgramConfig.led.curFrequence);
-const myCpuFan = new fanClass(Cat.ProgramConfig.fan.pwmNum, Cat.ProgramConfig.fan.curFrequence);
-const myCo2 = new relayClass(Cat.ProgramConfig.co2.channelNum);
-const CoolingFan = new relayClass(Cat.ProgramConfig.tempControl.channelNum);
-const myPlan = new planManager();
+const mainInst = new MainClass();
 
 // Web Server Setup
 const app = express();
 const PORT = 3001;
-
-let isManualMode = false;
-
-let systemStatus = {
-    led: 0,
-    co2: false,
-    cpuTemp: 0,
-    waterTemp: 0,
-    fan: false,
-    isManual: false,
-    cpuFanSpeed: 0
-};
-
-// History Data Storage (In-memory)
-interface HistoryItem {
-    timestamp: number;
-    led: number;
-    cpuTemp: number;
-    waterTemp: number;
-}
-const historyData: HistoryItem[] = [];
-const waterTempSensor = new DHTSensor(DHTType.DHT11, 4);
 
 app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, "../frontend/dist"))); // React 빌드 경로 (예시)
 
 app.get("/api/status", (req, res) => {
-    res.json(systemStatus);
+    res.json(mainInst.SystemStatus);
 });
 
 app.get("/api/history", (req, res) => {
-    res.json(historyData);
+    res.json(mainInst.HistoryData);
 });
 
 app.post("/api/led", (req, res) => {
     const { value, manual } = req.body;
     if (typeof manual === 'boolean') {
-        isManualMode = manual;
+        mainInst.ManualMode = manual;
     }
-    if (isManualMode && typeof value === 'number') {
-        myLed.setPwm(value);
+    if (mainInst.ManualMode && typeof value === 'number') {
+        mainInst.Led.setPwm(value);
         console.log(`...Manual LED Control: ${value}%`);
     }
     // Update status immediately for response
-    systemStatus.led = myLed.getValue();
-    systemStatus.isManual = isManualMode;
-    res.json(systemStatus);
+    mainInst.SystemStatus.led = mainInst.Led.getValue();
+    mainInst.SystemStatus.isManual = mainInst.ManualMode;
+    res.json(mainInst.SystemStatus);
 });
 
 app.post("/api/co2", (req, res) => {
     const { value, manual } = req.body;
     if (typeof manual === 'boolean') {
-        isManualMode = manual;
+        mainInst.ManualMode = manual;
     }
-    if (isManualMode && typeof value === 'boolean') {
-        myCo2.setRelay(value);
+    if (mainInst.ManualMode && typeof value === 'boolean') {
+        mainInst.Co2.setRelay(value);
         console.log(`...Manual CO2 Control: ${value}`);
     }
-    systemStatus.co2 = myCo2.getValue();
-    systemStatus.isManual = isManualMode;
-    res.json(systemStatus);
+    mainInst.SystemStatus.co2 = mainInst.Co2.getValue();
+    mainInst.SystemStatus.isManual = mainInst.ManualMode;
+    res.json(mainInst.SystemStatus);
 });
 
 app.post("/api/fan", (req, res) => {
     const { value, manual } = req.body;
     if (typeof manual === 'boolean') {
-        isManualMode = manual;
+        mainInst.ManualMode = manual;
     }
-    if (isManualMode && typeof value === 'boolean') {
-        CoolingFan.setRelay(value);
+    if (mainInst.ManualMode && typeof value === 'boolean') {
+        mainInst.CoolingFan.setRelay(value);
         console.log(`...Manual Fan Control: ${value}`);
     }
-    systemStatus.fan = CoolingFan.getValue();
-    systemStatus.isManual = isManualMode;
-    res.json(systemStatus);
+    mainInst.SystemStatus.fan = mainInst.CoolingFan.getValue();
+    mainInst.SystemStatus.isManual = mainInst.ManualMode;
+    res.json(mainInst.SystemStatus);
 });
 
 app.get("/api/config", (req, res) => {
@@ -135,17 +110,17 @@ app.post("/api/config/system", (req, res) => {
 });
 
 app.get("/api/schedule", (req, res) => {
-    res.json(myPlan.getSchedule());
+    res.json(mainInst.Plan.getSchedule());
 });
 
 app.post("/api/schedule", async (req, res) => {
     try {
         const newData = req.body;
-        myPlan.setSchedule(newData);
+        mainInst.Plan.setSchedule(newData);
 
         // Resume Auto Mode and apply changes immediately
-        isManualMode = false;
-        await updateSystem();
+        mainInst.ManualMode = false;
+        await mainInst.updateSystem();
 
         res.json({ success: true });
     } catch (error: any) {
@@ -158,188 +133,19 @@ app.get(/.*/, (req, res) => {
     res.sendFile(path.join(__dirname, "../frontend/dist/index.html"));
 });
 
-async function updateSystem() {
-    const prevLedValue = myLed.getValue();
-    const prevCo2Value = myCo2.getValue();
-    const newValue = myPlan.getCurrentValue();
-
-    let curTemp = 0;
-    try {
-        curTemp = await get_temp();
-    } catch (e) {
-        console.error("Error reading CPU temp:", e);
-    }
-    let tempC = 0;
-    try {
-        tempC = sensor.readSimpleC(5);
-    } catch (e) {
-        console.error("Error reading Water temp:", e);
-    }
-
-    // console.log(`...curValue-> led: ${prevLedValue}%, Co2: ${prevCo2Value}`);
-    // console.log(`...newValue-> led: ${newValue.ledValue}%, Co2: ${newValue.co2}`);
-    // console.log(`...CPU Temp: ${curTemp} degC`);
-    // console.log(`...Water Temp: ${tempC} degC`);
-
-    // Update Global Status for Web
-    systemStatus = {
-        led: myLed.getValue(),
-        co2: myCo2.getValue(),
-        cpuTemp: curTemp,
-        waterTemp: tempC,
-        fan: CoolingFan.getValue(),
-        isManual: isManualMode,
-        cpuFanSpeed: myCpuFan.getValue()
-    };
-
-    // Save to History
-    historyData.push({
-        timestamp: Date.now(),
-        led: systemStatus.led,
-        cpuTemp: systemStatus.cpuTemp,
-        waterTemp: systemStatus.waterTemp || 0
-    });
-
-    // Limit history size (approx. 24 hours at 5s interval = ~17280 points)
-    if (historyData.length > 20000) historyData.shift();
-    appendToHistory(historyData[historyData.length - 1]).catch(err => console.error("Failed to save history:", err));
-
-    // Operate LED and CO2 based on the plan
-    if (!isManualMode) {
-        if (prevLedValue !== newValue.ledValue) {
-            console.log(`...Set LED PWM to ${newValue.ledValue}`);
-            myLed.setPwm(newValue.ledValue);
-        }
-        if (prevCo2Value !== newValue.co2) {
-            console.log(`...Set CO2 Relay to ${newValue.co2 ? "ON" : "OFF"}`);
-            myCo2.setRelay(newValue.co2);
-        }
-        if (Cat.ProgramConfig.tempControl.enable) {
-            // console.log(`...Cooling Fan status:${CoolingFan.getValue() ? "ON" : "OFF"}`);
-            if (tempC >= Cat.ProgramConfig.tempControl.startTemp && !CoolingFan.getValue()) {
-                console.log("...Set cooling Fan ON");
-                CoolingFan.setRelay(true);
-            } else if (tempC <= Cat.ProgramConfig.tempControl.endTemp && CoolingFan.getValue()) {
-                console.log("...Set cooling Fan OFF");
-                CoolingFan.setRelay(false);
-            }
-        }
-    }
-
-    // CPU Fan Control (Independent of Manual Mode or add to manual if needed)
-    // Simple linear control: 45°C -> 0%, 70°C -> 100%
-    const cpuStartTemp = Cat.ProgramConfig.cpuFanControl?.startTemp ?? 45;
-    const cpuFullTemp = Cat.ProgramConfig.cpuFanControl?.endTemp ?? 70;
-    let targetCpuFanSpeed = 0;
-
-    if (curTemp <= cpuStartTemp) targetCpuFanSpeed = 0;
-    else if (curTemp >= cpuFullTemp) targetCpuFanSpeed = 100;
-    else targetCpuFanSpeed = Math.round(((curTemp - cpuStartTemp) / (cpuFullTemp - cpuStartTemp)) * 100);
-
-    myCpuFan.setPwm(targetCpuFanSpeed);
-}
-
-function getHistoryFilename(date: Date): string {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    return path.join(DB_DIR_PATH, `history_${year}-${month}-${day}.jsonl`);
-}
-
-async function loadHistory() {
-    try {
-        await fs.mkdir(DB_DIR_PATH, { recursive: true });
-
-        // Load yesterday and today to ensure continuity across midnight
-        const today = new Date();
-        const yesterday = new Date(today);
-        yesterday.setDate(yesterday.getDate() - 1);
-
-        const files = [getHistoryFilename(yesterday), getHistoryFilename(today)];
-
-        for (const file of files) {
-            try {
-                const data = await fs.readFile(file, 'utf-8');
-                const lines = data.split('\n');
-                for (const line of lines) {
-                    if (line.trim()) {
-                        try {
-                            historyData.push(JSON.parse(line));
-                        } catch (e) { /* ignore invalid lines */ }
-                    }
-                }
-            } catch (e: any) {
-                if (e.code !== 'ENOENT') console.error(`Failed to read history file ${file}:`, e);
-            }
-        }
-        if (historyData.length > 20000) historyData.splice(0, historyData.length - 20000);
-        console.log(`...Loaded ${historyData.length} history items.`);
-    } catch (e: any) {
-        console.error("Failed to load history:", e);
-    }
-}
-
-async function appendToHistory(item: HistoryItem) {
-    try {
-        const filename = getHistoryFilename(new Date(item.timestamp));
-        await fs.appendFile(filename, JSON.stringify(item) + '\n');
-    } catch (e) {
-        console.error("Failed to append history:", e);
-    }
-}
-
-async function cleanupOldHistory() {
-    try {
-        const files = await fs.readdir(DB_DIR_PATH);
-        const now = new Date();
-        const retentionDays = 30;
-
-        for (const file of files) {
-            if (file.startsWith('history_') && file.endsWith('.jsonl')) {
-                const match = file.match(/history_(\d{4}-\d{2}-\d{2})\.jsonl/);
-                if (match) {
-                    const fileDate = new Date(match[1]);
-                    const diffTime = now.getTime() - fileDate.getTime();
-                    const diffDays = diffTime / (1000 * 3600 * 24);
-
-                    if (diffDays > retentionDays) {
-                        await fs.unlink(path.join(DB_DIR_PATH, file));
-                        console.log(`...Deleted old history file: ${file}`);
-                    }
-                }
-            }
-        }
-    } catch (e: any) {
-        if (e.code !== 'ENOENT') console.error("Failed to cleanup old history:", e);
-    }
-}
-
-function scheduleDailyCleanup() {
-    const now = new Date();
-    const nextMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 0, 0, 0);
-    const delay = nextMidnight.getTime() - now.getTime();
-
-    console.log(`...Scheduled next history cleanup in ${Math.round(delay / 60000)} minutes`);
-
-    setTimeout(async () => {
-        await cleanupOldHistory();
-        scheduleDailyCleanup();
-    }, delay);
-}
-
 async function main() {
-    await loadHistory();
-    scheduleDailyCleanup();
-    myCo2.setRelay(false);
-    CoolingFan.setRelay(false);
+    await mainInst.loadHistory();
+    mainInst.scheduleDailyCleanup();
+    mainInst.Co2.setRelay(false);
+    mainInst.CoolingFan.setRelay(false);
     try {
-        await updateSystem();
+        await mainInst.updateSystem();
     } catch (e) {
         console.error("Initial system update failed:", e);
     }
     periodicCheck(async () => {
         try {
-            await updateSystem();
+            await mainInst.updateSystem();
         } catch (e) {
             console.error("Error in periodic check:", e);
         }
