@@ -1,5 +1,5 @@
 import SPI from 'pi-spi';
-import * as  rpio from 'rpio';
+import rpio from 'rpio';
 
 class SH1107Display {
     private spi: SPI.SPI;
