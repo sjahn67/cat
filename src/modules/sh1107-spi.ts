@@ -32,7 +32,7 @@ class SH1107Display {
         SET_DISPLAY_START_LINE: 0xDC,
     };
 
-    // 5x8 폰트 데이터 정의
+    // 5x8 font data definition
     private readonly font5x8: { [key: string]: number[] } = {
         'A': [0x7C, 0x12, 0x11, 0x12, 0x7C], 'B': [0x7F, 0x49, 0x49, 0x49, 0x36],
         'C': [0x3E, 0x41, 0x41, 0x41, 0x22], 'D': [0x7F, 0x41, 0x41, 0x22, 0x1C],
@@ -64,7 +64,7 @@ class SH1107Display {
         rpio.open(this.pinDC, rpio.OUTPUT, rpio.LOW);
         rpio.open(this.pinRST, rpio.OUTPUT, rpio.HIGH);
         this.spi = SPI.initialize(device);
-        this.spi.clockSpeed(2000000); // 속도를 2MHz로 낮춰 안정성 확보
+        this.spi.clockSpeed(2000000); // Lower speed to 2MHz for stability
     }
 
     private reset(): void {
@@ -99,7 +99,7 @@ class SH1107Display {
     public async initialize(): Promise<void> {
         this.reset();
 
-        // SH1107 128x128 안정적인 초기화 시퀀스
+        // SH1107 128x128 stable initialization sequence
         const initCmds = [
             0xAE,             // Display OFF
             0xD5, 0x50,       // Set Display Clock Divide Ratio
@@ -150,7 +150,7 @@ class SH1107Display {
         else this.buffer[index] &= ~(1 << bit);
     }
 
-    // 텍스트 그리기 메서드 (오류 해결 지점)
+    // Text drawing method (Error resolution point)
     public drawText(x: number, y: number, text: string, scale: number = 1): void {
         let currentX = x;
         for (const char of text.toUpperCase()) {
