@@ -40,7 +40,7 @@ export class DHTSensor {
 
         } catch (err) {
             console.error("❌ 센서 데이터를 읽는데 실패했습니다:", err);
-            return null;
+            return { temperature: 0, humidity: 0 };
         }
     }
 }

@@ -141,6 +141,14 @@ class SH1107Display {
         this.buffer.fill(0x00);
     }
 
+    public async setContrast(contrast: number): Promise<void> {
+        await this.writeCommand([SH1107Display.Commands.SET_CONTRAST, contrast]);
+    }
+
+    public async setDisplayStartLine(line: number): Promise<void> {
+        await this.writeCommand([SH1107Display.Commands.SET_DISPLAY_START_LINE, line & 0x7F]);
+    }
+
     public setPixel(x: number, y: number, color: boolean = true): void {
         if (x < 0 || x >= this.width || y < 0 || y >= this.height) return;
         const page = Math.floor(y / 8);

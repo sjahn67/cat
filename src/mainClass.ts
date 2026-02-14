@@ -27,6 +27,8 @@ export class MainClass {
     private isManualMode: boolean;
     private systemStatus: ISystemStatus;
     private historyData: IHistoryItem[] = [];
+    private lastScreenMoveTime: number = 0;
+    private screenOffset: number = 0;
 
     constructor() {
         const pConfig = Cat.ProgramConfig;
@@ -167,6 +169,17 @@ export class MainClass {
             // Current Time at Bottom
             const now = new Date();
             const hours = now.getHours();
+
+            // Auto Dimming (00:00 ~ 07:00)
+            await this.oled.setContrast(hours < 7 ? 30 : 128);
+
+            // Screen Protection: Move screen vertically every minute (Pixel Shift)
+            if (Date.now() - this.lastScreenMoveTime > 60000) {
+                this.screenOffset = (this.screenOffset + 1) % 4; // Cycle 0 -> 1 -> 2 -> 3 -> 0
+                await this.oled.setDisplayStartLine(this.screenOffset);
+                this.lastScreenMoveTime = Date.now();
+            }
+
             const ampm = hours >= 12 ? 'PM' : 'AM';
             const hours12 = hours % 12 || 12;
             const timeStr = `${ampm} ${String(hours12).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
