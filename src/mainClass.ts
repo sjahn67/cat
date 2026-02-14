@@ -6,6 +6,7 @@ import { DHTSensor } from "./modules/dht";
 import { fanClass } from "./modules/fan";
 import { ledClass } from "./modules/led";
 import { relayClass } from "./modules/relay";
+import SH1107Display from "./modules/sh1107-spi";
 import { planManager } from "./procedure/plan";
 import sensor from "ds18b20-raspi-typescript";
 import { get_temp } from "./modules/thermo";
@@ -19,6 +20,8 @@ export class MainClass {
     private co2: relayClass;
     private coolingFan: relayClass;
     private airTemp: DHTSensor;
+    private oled: SH1107Display;
+    private oledInitialized: boolean = false;
     private plan: planManager;
 
     private isManualMode: boolean;
@@ -32,6 +35,7 @@ export class MainClass {
         this.co2 = new relayClass(pConfig.co2.channelNum);
         this.coolingFan = new relayClass(pConfig.tempControl.channelNum);
         this.airTemp = new DHTSensor(pConfig.airTempSensor.sensorType, pConfig.airTempSensor.gpio);
+        this.oled = new SH1107Display();
         this.plan = new planManager();
 
         this.isManualMode = false;
@@ -129,6 +133,47 @@ export class MainClass {
         else targetCpuFanSpeed = Math.round(((curTemp - cpuStartTemp) / (cpuFullTemp - cpuStartTemp)) * 100);
 
         this.cpuFan.setPwm(targetCpuFanSpeed);
+
+        // OLED Display Update
+        if (!this.oledInitialized) {
+            try {
+                await this.oled.initialize();
+                this.oledInitialized = true;
+            } catch (e) {
+                console.error("Failed to initialize OLED:", e);
+            }
+        }
+
+        if (this.oledInitialized) {
+            this.oled.clear();
+
+            // Top Half: Water Temp (y: 0-63)
+            this.oled.drawText(10, 5, "WATER TEMP", 1);
+            this.oled.drawText(8, 20, `${tempC.toFixed(1)}`, 4);
+            this.oled.drawText(108, 36, "C", 2);
+
+            // Divider Lines
+            this.oled.drawRect(0, 64, 128, 1, true); // Horizontal Divider
+            this.oled.drawRect(64, 64, 1, 46, true); // Vertical Divider (Bottom)
+
+            // Bottom Left: Air Temp (x: 0-63, y: 64-127)
+            this.oled.drawText(8, 72, "AIR T.", 1);
+            this.oled.drawText(8, 88, curAirTemp ? `${curAirTemp.temperature.toFixed(1)}` : "--.-", 2);
+
+            // Bottom Right: Humidity (x: 64-127, y: 64-127)
+            this.oled.drawText(72, 72, "HUMID", 1);
+            this.oled.drawText(72, 88, curAirTemp ? `${curAirTemp.humidity.toFixed(0)}%` : "--%", 2);
+
+            // Current Time at Bottom
+            const now = new Date();
+            const hours = now.getHours();
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+            const hours12 = hours % 12 || 12;
+            const timeStr = `${ampm} ${String(hours12).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
+            this.oled.drawText(31, 115, timeStr, 1);
+
+            await this.oled.display();
+        }
     }
 
     public getHistoryFilename(date: Date): string {

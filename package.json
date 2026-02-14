@@ -16,6 +16,7 @@
   "license": "ISC",
   "dependencies": {
     "axios": "^1.13.2",
+    "canvas": "^3.2.1",
     "cors": "^2.8.5",
     "ds18b20-raspi-typescript": "0.4.0",
     "express": "^5.2.1",
@@ -23,9 +24,12 @@
     "node-schedule": "^2.1.1",
     "pigpio": "^3.3.1",
     "pigpio-mock": "^0.0.1",
+    "pi-spi": "^1.2.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "recharts": "^3.6.0",
+    "rpio": "^2.4.2",
+    "spi-device": "^3.1.2",
     "ts-node": "^10.9.2",
     "winston": "^2.4.5",
     "winston-daily-rotate-file": "^1.7.2"
