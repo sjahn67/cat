@@ -5,22 +5,46 @@
   "main": "index.js",
   "scripts": {
     "dev": "node  ./dist/index.js",
+    "dev:web": "vite",
     "start": "cross-env NODE_ENV=production  node ./dist/index.js",
-    "build": "gulp",
+    "build": "gulp && vite build",
+    "build:web": "vite build",
     "build-watch": "gulp build:watch",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Seongjin Ahn",
   "license": "ISC",
   "dependencies": {
+    "axios": "^1.13.2",
+    "canvas": "^3.2.1",
+    "cors": "^2.8.5",
     "ds18b20-raspi-typescript": "0.4.0",
+    "express": "^5.2.1",
+    "node-dht-sensor": "^0.4.5",
     "node-schedule": "^2.1.1",
+    "pi-spi": "^1.2.1",
     "pigpio": "^3.3.1",
     "pigpio-mock": "^0.0.1",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "recharts": "^3.6.0",
+    "rpio": "^2.4.2",
+    "spi-device": "^3.1.2",
+    "ts-node": "^10.9.2",
     "winston": "^2.4.5",
     "winston-daily-rotate-file": "^1.7.2"
   },
   "devDependencies": {
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/node": "^20.12.11",
+    "@types/node-dht-sensor": "^0.4.2",
+    "@types/node-schedule": "^2.1.7",
+    "@types/pi-spi": "^0.0.31",
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "@types/rpio": "^2.4.6",
+    "@vitejs/plugin-react": "^4.0.0",
     "copy-dir": "=1.3.0",
     "cp-file": "=9.0.0",
     "cross-env": "=5.2.0",
@@ -33,8 +57,7 @@
     "gulp-tslint": "=8.1.4",
     "gulp-typescript": "^5.0.1",
     "gulp-watch": "=5.0.1",
-    "@types/node": "^20.12.11",
-    "@types/node-schedule": "^2.1.7",
-    "typescript": "^5.3.3"
+    "typescript": "^5.3.3",
+    "vite": "^4.3.0"
   }
 }

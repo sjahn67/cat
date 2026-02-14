@@ -4,7 +4,7 @@ import { Json } from "../interfaces/interface-json";
 import { join } from "path";
 import * as fs from "fs";
 
-interface IDataInfo {
+export interface IDataInfo {
     time: string,
     ledValue: number,
     ledDelta?: number,
@@ -37,7 +37,11 @@ export class planManager {
             console.log("error:", err);
         }
 
-        // calculate delta
+        this.calculateDeltas();
+        console.log(this.data);
+    }
+
+    private calculateDeltas() {
         let sData: IDataInfo = null;
         this.data.forEach(item => {
             if (sData !== null) {
@@ -50,7 +54,40 @@ export class planManager {
                 sData = item;
             }
         })
-        console.log(this.data);
+    }
+
+    public getSchedule(): IDataInfo[] {
+        return this.data;
+    }
+
+    public setSchedule(newData: IDataInfo[]) {
+        // Validation
+        const timeSet = new Set<string>();
+        for (const item of newData) {
+            if (!/^(?:[01]\d|2[0-3])[0-5]\d$/.test(item.time)) {
+                throw new Error(`Invalid time format: ${item.time}`);
+            }
+            if (item.ledValue < 0 || item.ledValue > 100) {
+                throw new Error(`LED value must be between 0 and 100. Found: ${item.ledValue}`);
+            }
+            if (timeSet.has(item.time)) {
+                throw new Error(`Duplicate time entry: ${item.time}`);
+            }
+            timeSet.add(item.time);
+        }
+
+        // Sort by time to ensure correct order
+        this.data = newData.sort((a, b) => Number(a.time) - Number(b.time));
+
+        this.calculateDeltas();
+
+        // Save to file
+        const json = { table: this.data };
+        try {
+            fs.writeFileSync(SCHEDULE_DATA_PATH, JSON.stringify(json, null, 2));
+        } catch (e) {
+            console.error("Failed to save schedule data:", e);
+        }
     }
 
     private getMinTime(source: string | number): number {
@@ -85,7 +122,7 @@ export class planManager {
         let seconds = date_time.getSeconds();
 
         // prints date & time in YYYY-MM-DD HH:MM:SS format
-        console.log(year + "-" + month + "-" + date + " " + hours + ":" + minutes + ":" + seconds);
+        // console.log(year + "-" + month + "-" + date + " " + hours + ":" + minutes + ":" + seconds);
 
         let current = hours * 100 + minutes;
         // console.log(current);

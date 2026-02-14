@@ -1,0 +1,54 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "run-production",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "program": "${workspaceFolder}/src/index.ts",
+            "preLaunchTask": "tsc: watch - tsconfig.json",
+            "outFiles": [
+                "${workspaceFolder}/dist/**/*.js"
+            ],
+            "runtimeExecutable": "sudo",
+            "runtimeArgs": [
+                "node",
+                "--inspect-brk", // 디버거가 붙을 때까지 대기
+                "-r",
+                "ts-node/register" // TypeScript를 바로 실행할 경우
+            ],
+            "sourceMaps": true,
+            "outputCapture": "std",
+            "cwd": "${workspaceFolder}",
+            "env": {
+                "NODE_ENV": "production"
+            },
+            "console": "integratedTerminal", // 비밀번호 입력을 위해 통합 터미널 사용 필수
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "run-developemnt",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "program": "${workspaceFolder}/src/index.ts",
+            "preLaunchTask": "tsc: watch - tsconfig.json",
+            "outFiles": [
+                "${workspaceFolder}/dist/**/*.js"
+            ],
+            "sourceMaps": true,
+            "outputCapture": "std",
+            "cwd": "${workspaceFolder}",
+            "env": {
+                "NODE_ENV": "developement"
+            }
+        }
+    ]
+}
