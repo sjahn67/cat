@@ -11,6 +11,7 @@ interface SystemStatus {
     fan: boolean;
     isManual: boolean;
     cpuFanSpeed: number;
+    airTemp: { temperature: number; humidity: number } | null;
 }
 
 interface GraphData {
@@ -18,6 +19,8 @@ interface GraphData {
     led: number;
     cpuTemp: number;
     waterTemp: number;
+    airTemp?: number;
+    humidity?: number;
 }
 
 function App() {
@@ -42,11 +45,17 @@ function App() {
         axios.get('/api/history')
             .then(res => {
                 const formattedData = res.data.map((item: any) => {
-                    if (!item.time && item.timestamp) {
+                    let time = item.time;
+                    if (!time && item.timestamp) {
                         const d = new Date(item.timestamp);
-                        return { ...item, time: `${d.getHours()}:${String(d.getMinutes()).padStart(2, '0')}:${String(d.getSeconds()).padStart(2, '0')}` };
+                        time = `${d.getHours()}:${String(d.getMinutes()).padStart(2, '0')}:${String(d.getSeconds()).padStart(2, '0')}`;
                     }
-                    return item;
+                    return {
+                        ...item,
+                        time,
+                        airTemp: item.airTemp?.temperature,
+                        humidity: item.airTemp?.humidity
+                    };
                 });
                 setGraphData(formattedData);
             })
@@ -81,7 +90,9 @@ function App() {
                         time: timeStr,
                         led: data.led,
                         cpuTemp: data.cpuTemp,
-                        waterTemp: data.waterTemp
+                        waterTemp: data.waterTemp,
+                        airTemp: data.airTemp?.temperature,
+                        humidity: data.airTemp?.humidity
                     }];
                     // 최근 24시간 데이터 유지
                     const MAX_DATA_POINTS = (60000 / updateInterval) * 60 * 24;
@@ -227,6 +238,8 @@ function App() {
             </div>
 
             <div style={{ display: 'flex', gap: '10px', marginBottom: '20px', flexWrap: 'wrap', justifyContent: 'center' }}>
+                <StatusCard title="Air Temp" value={`${(status.airTemp?.temperature || 0).toFixed(1)} °C`} darkMode={darkMode} />
+                <StatusCard title="Humidity" value={`${(status.airTemp?.humidity || 0).toFixed(1)} %`} darkMode={darkMode} />
                 <StatusCard title="Water Temp" value={`${(status.waterTemp || 0).toFixed(1)} °C`} color={status.waterTemp > 28 ? 'red' : (darkMode ? '#4da6ff' : 'blue')} darkMode={darkMode} />
                 <StatusCard title="CPU Temp" value={`${status.cpuTemp.toFixed(1)} °C`} darkMode={darkMode} />
                 <StatusCard title="CO2 Relay" value={status.co2 ? "ON" : "OFF"} color={status.co2 ? 'green' : 'gray'} onClick={toggleCo2} icon="🫧" animation={status.co2 ? "pulse" : ""} darkMode={darkMode} />
@@ -279,8 +292,10 @@ function App() {
                             <YAxis yAxisId="right" orientation="right" domain={[0, 100]} width={40} tick={{ fontSize: 12, fill: theme.chartText }} stroke={theme.chartGrid} />
                             <Tooltip contentStyle={{ backgroundColor: theme.cardBg, borderColor: theme.borderColor, color: theme.text }} />
                             <Line yAxisId="right" type="monotone" dataKey="led" stroke="#8884d8" strokeWidth={2} name="LED %" dot={false} />
+                            <Line yAxisId="right" type="monotone" dataKey="humidity" stroke="#00C49F" strokeWidth={2} name="Humidity %" dot={false} />
                             <Line yAxisId="left" type="monotone" dataKey="waterTemp" stroke="#82ca9d" strokeWidth={2} name="Water °C" dot={false} />
                             <Line yAxisId="left" type="monotone" dataKey="cpuTemp" stroke="#ff7300" strokeWidth={2} name="CPU °C" dot={false} />
+                            <Line yAxisId="left" type="monotone" dataKey="airTemp" stroke="#0088FE" strokeWidth={2} name="Air °C" dot={false} />
                         </LineChart>
                     </ResponsiveContainer>
                 </div>
