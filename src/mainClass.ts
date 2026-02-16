@@ -23,6 +23,7 @@ export class MainClass {
     private oled: SH1107Display;
     private oledInitialized: boolean = false;
     private plan: planManager;
+    private updateTick: number = 0;
 
     private isManualMode: boolean;
     private systemStatus: ISystemStatus;
@@ -49,9 +50,13 @@ export class MainClass {
             cpuFanSpeed: 0,
             airTemp: { temperature: 0, humidity: 0 }
         };
+
+        // Start OLED update loop (1 second interval)
+        setInterval(() => this.updateOled(), 1000);
     }
 
     public async updateSystem() {
+        this.updateTick++;
         const prevLedValue = this.led.getValue();
         const prevCo2Value = this.co2.getValue();
         const newValue = this.plan.getCurrentValue();
@@ -74,31 +79,6 @@ export class MainClass {
         // console.log(`...newValue-> led: ${newValue.ledValue}%, Co2: ${newValue.co2}`);
         // console.log(`...CPU Temp: ${curTemp} degC`);
         // console.log(`...Water Temp: ${tempC} degC`);
-
-        // Update Global Status for Web
-        this.systemStatus = {
-            led: this.led.getValue(),
-            co2: this.co2.getValue(),
-            cpuTemp: curTemp,
-            waterTemp: tempC,
-            fan: this.coolingFan.getValue(),
-            isManual: this.isManualMode,
-            cpuFanSpeed: this.cpuFan.getValue(),
-            airTemp: curAirTemp
-        };
-
-        // Save to History
-        this.historyData.push({
-            timestamp: Date.now(),
-            led: this.systemStatus.led,
-            cpuTemp: this.systemStatus.cpuTemp,
-            waterTemp: this.systemStatus.waterTemp || 0,
-            airTemp: this.systemStatus.airTemp
-        });
-
-        // Limit history size (approx. 24 hours at 5s interval = ~17280 points)
-        if (this.historyData.length > 20000) this.historyData.shift();
-        this.appendToHistory(this.historyData[this.historyData.length - 1]).catch(err => console.error("Failed to save history:", err));
 
         // Operate LED and CO2 based on the plan
         if (!this.isManualMode) {
@@ -134,46 +114,30 @@ export class MainClass {
 
         this.cpuFan.setPwm(targetCpuFanSpeed);
 
-        // OLED Display Update
-        if (!this.oledInitialized) {
-            try {
-                await this.oled.initialize();
-                this.oledInitialized = true;
-            } catch (e) {
-                console.error("Failed to initialize OLED:", e);
-            }
-        }
+        // Update Global Status for Web
+        this.systemStatus = {
+            led: this.led.getValue(),
+            co2: this.co2.getValue(),
+            cpuTemp: curTemp,
+            waterTemp: tempC,
+            fan: this.coolingFan.getValue(),
+            isManual: this.isManualMode,
+            cpuFanSpeed: this.cpuFan.getValue(),
+            airTemp: curAirTemp
+        };
 
-        if (this.oledInitialized) {
-            this.oled.clear();
+        // Save to History
+        this.historyData.push({
+            timestamp: Date.now(),
+            led: this.systemStatus.led,
+            cpuTemp: this.systemStatus.cpuTemp,
+            waterTemp: this.systemStatus.waterTemp || 0,
+            airTemp: this.systemStatus.airTemp
+        });
 
-            // Top Half: Water Temp (y: 0-63)
-            this.oled.drawText(10, 5, "WATER TEMP", 1);
-            this.oled.drawText(8, 20, `${tempC.toFixed(1)}`, 4);
-            this.oled.drawText(108, 36, "C", 2);
-
-            // Divider Lines
-            this.oled.drawRect(0, 64, 128, 1, true); // Horizontal Divider
-            this.oled.drawRect(64, 64, 1, 46, true); // Vertical Divider (Bottom)
-
-            // Bottom Left: Air Temp (x: 0-63, y: 64-127)
-            this.oled.drawText(8, 72, "AIR T.", 1);
-            this.oled.drawText(8, 88, curAirTemp ? `${curAirTemp.temperature.toFixed(1)}` : "--.-", 2);
-
-            // Bottom Right: Humidity (x: 64-127, y: 64-127)
-            this.oled.drawText(72, 72, "HUMID", 1);
-            this.oled.drawText(72, 88, curAirTemp ? `${curAirTemp.humidity.toFixed(0)}%` : "--%", 2);
-
-            // Current Time at Bottom
-            const now = new Date();
-            const hours = now.getHours();
-            const ampm = hours >= 12 ? 'PM' : 'AM';
-            const hours12 = hours % 12 || 12;
-            const timeStr = `${ampm} ${String(hours12).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
-            this.oled.drawText(31, 115, timeStr, 1);
-
-            await this.oled.display();
-        }
+        // Limit history size (approx. 24 hours at 5s interval = ~17280 points)
+        if (this.historyData.length > 20000) this.historyData.shift();
+        this.appendToHistory(this.historyData[this.historyData.length - 1]).catch(err => console.error("Failed to save history:", err));
     }
 
     public getHistoryFilename(date: Date): string {
@@ -296,5 +260,50 @@ export class MainClass {
         return this.plan;
     }
 
+    private async updateOled() {
+        if (!this.oledInitialized) {
+            try {
+                await this.oled.initialize();
+                this.oledInitialized = true;
+            } catch (e) {
+                console.error("Failed to initialize OLED:", e);
+                return;
+            }
+        }
 
+        this.oled.clear();
+
+        const tempC = this.systemStatus.waterTemp || 0;
+        const curAirTemp = this.systemStatus.airTemp;
+
+        // Top Half: Water Temp (y: 0-63)
+        this.oled.drawText(10, 5, "WATER TEMP", 1);
+        if (this.systemStatus.co2 && new Date().getSeconds() % 2 === 0) {
+            this.oled.drawText(108, 5, "CO2", 1);
+        }
+        this.oled.drawText(8, 20, `${tempC.toFixed(1)}`, 4);
+        this.oled.drawText(108, 36, "C", 2);
+
+        // Divider Lines
+        this.oled.drawRect(0, 64, 128, 1, true); // Horizontal Divider
+        this.oled.drawRect(64, 64, 1, 46, true); // Vertical Divider (Bottom)
+
+        // Bottom Left: Air Temp (x: 0-63, y: 64-127)
+        this.oled.drawText(8, 72, "AIR T.", 1);
+        this.oled.drawText(8, 88, curAirTemp ? `${curAirTemp.temperature.toFixed(1)}` : "--.-", 2);
+
+        // Bottom Right: Humidity (x: 64-127, y: 64-127)
+        this.oled.drawText(72, 72, "HUMID", 1);
+        this.oled.drawText(72, 88, curAirTemp ? `${curAirTemp.humidity.toFixed(0)}%` : "--%", 2);
+
+        // Current Time at Bottom
+        const now = new Date();
+        const hours = now.getHours();
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+        const hours12 = hours % 12 || 12;
+        const timeStr = `${ampm} ${String(hours12).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
+        this.oled.drawText(31, 115, timeStr, 1);
+
+        await this.oled.display();
+    }
 }
