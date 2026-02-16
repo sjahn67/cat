@@ -169,6 +169,8 @@ class SH1107Display {
                     }
                 }
                 currentX += (6 * scale);
+            } else {
+                currentX += (6 * scale); // Unknown character treated as space
             }
         }
     }

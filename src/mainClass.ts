@@ -23,7 +23,6 @@ export class MainClass {
     private oled: SH1107Display;
     private oledInitialized: boolean = false;
     private plan: planManager;
-    private updateTick: number = 0;
 
     private isManualMode: boolean;
     private systemStatus: ISystemStatus;
@@ -56,7 +55,6 @@ export class MainClass {
     }
 
     public async updateSystem() {
-        this.updateTick++;
         const prevLedValue = this.led.getValue();
         const prevCo2Value = this.co2.getValue();
         const newValue = this.plan.getCurrentValue();
