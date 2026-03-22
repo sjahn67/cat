@@ -36,7 +36,7 @@ export class fanClass {
       this.pValue = 0;
     }
     // Fan minimum operation threshold (typically 30% is required to start spinning)
-    if (this.pValue > 0 && this.pValue < 30) {
+    if (this.pValue > 0 && this.pValue < 10) {
       this.pValue = 30;
     }
     this.TargetDutyCycle = Math.round(this.pValue / 100 * Cat.ProgramConfig.fan.maxDutyCycle);
