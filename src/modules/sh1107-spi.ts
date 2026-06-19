@@ -1,5 +1,6 @@
 import SPI from 'pi-spi';
 import rpio from 'rpio';
+import { NODE_ENV, NodeEnvTypes } from "../constants";
 
 class SH1107Display {
     private spi: SPI.SPI;
@@ -60,6 +61,10 @@ class SH1107Display {
 
     constructor(device: string = '/dev/spidev0.0') {
         this.buffer = Buffer.alloc((this.width * this.height) / 8);
+        if (NODE_ENV === NodeEnvTypes.NODE_ENV_DEV) {
+            console.log("...OLED Display initialized in Mock/Dev mode");
+            return;
+        }
         rpio.init({ mapping: 'gpio' });
         rpio.open(this.pinDC, rpio.OUTPUT, rpio.LOW);
         rpio.open(this.pinRST, rpio.OUTPUT, rpio.HIGH);
@@ -67,15 +72,23 @@ class SH1107Display {
         this.spi.clockSpeed(2000000); // Lower speed to 2MHz for stability
     }
 
-    private reset(): void {
+    private async reset(): Promise<void> {
+        if (NODE_ENV === NodeEnvTypes.NODE_ENV_DEV) {
+            await new Promise(resolve => setTimeout(resolve, 100));
+            return;
+        }
         rpio.write(this.pinRST, rpio.LOW);
-        rpio.msleep(50);
+        await new Promise(resolve => setTimeout(resolve, 50));
         rpio.write(this.pinRST, rpio.HIGH);
-        rpio.msleep(50);
+        await new Promise(resolve => setTimeout(resolve, 50));
     }
 
     private writeCommand(command: number | number[]): Promise<void> {
         return new Promise((resolve, reject) => {
+            if (NODE_ENV === NodeEnvTypes.NODE_ENV_DEV) {
+                resolve();
+                return;
+            }
             rpio.write(this.pinDC, rpio.LOW);
             const cmds = Array.isArray(command) ? command : [command];
             this.spi.write(Buffer.from(cmds), (err) => {
@@ -87,6 +100,10 @@ class SH1107Display {
 
     private writeData(data: Buffer | number[]): Promise<void> {
         return new Promise((resolve, reject) => {
+            if (NODE_ENV === NodeEnvTypes.NODE_ENV_DEV) {
+                resolve();
+                return;
+            }
             rpio.write(this.pinDC, rpio.HIGH);
             const buf = Buffer.isBuffer(data) ? data : Buffer.from(data);
             this.spi.write(buf, (err) => {
@@ -97,7 +114,7 @@ class SH1107Display {
     }
 
     public async initialize(): Promise<void> {
-        this.reset();
+        await this.reset();
 
         // SH1107 128x128 stable initialization sequence
         const initCmds = [
@@ -186,6 +203,10 @@ class SH1107Display {
     }
 
     public async close(): Promise<void> {
+        if (NODE_ENV === NodeEnvTypes.NODE_ENV_DEV) {
+            console.log("...OLED Display closed (Mock)");
+            return;
+        }
         await this.writeCommand(SH1107Display.Commands.DISPLAY_OFF);
     }
 }
