@@ -304,4 +304,19 @@ export class MainClass {
 
         await this.oled.display();
     }
+
+    public async close() {
+        console.log("...Shutting down Aquarium Controller gracefully");
+        try {
+            this.led.setPwm(0);
+            this.cpuFan.setPwm(0);
+            this.co2.setRelay(false);
+            this.coolingFan.setRelay(false);
+            if (this.oledInitialized) {
+                await this.oled.close();
+            }
+        } catch (e) {
+            console.error("Error during graceful shutdown of actuators:", e);
+        }
+    }
 }

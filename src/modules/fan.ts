@@ -1,7 +1,11 @@
 import { Cat } from "../globals";
-import { Gpio } from "pigpio";
+import { NODE_ENV, NodeEnvTypes } from "../constants";
+import * as GPIO from "pigpio";
+import * as GPIO_MOCK from "pigpio-mock";
+const Gpio: GPIO.Gpio | GPIO_MOCK.Gpio = (NODE_ENV === NodeEnvTypes.NODE_ENV_DEV) ? GPIO_MOCK.Gpio : GPIO.Gpio;
+
 export class fanClass {
-  private fan: Gpio;
+  private fan: GPIO.Gpio | GPIO_MOCK.Gpio;
   private TargetDutyCycle: number;
   private CurrentDutyCyle: number;
   private Frequence: number;

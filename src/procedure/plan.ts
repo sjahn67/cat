@@ -27,11 +27,12 @@ export class planManager {
         try {
             json = JSON.parse(fs.readFileSync(SCHEDULE_DATA_PATH, "utf8"));
             this.data = json["table"];
-
+            this.data.sort((a, b) => Number(a.time) - Number(b.time));
         } catch (err) {
             if (!fs.existsSync(SCHEDULE_DATA_PATH)) {
                 json = JSON.parse(fs.readFileSync(DEFAULT_SCHEDULE_DATA_PATH, "utf8"));
                 this.data = json["table"];
+                this.data.sort((a, b) => Number(a.time) - Number(b.time));
                 fs.writeFileSync(SCHEDULE_DATA_PATH, JSON.stringify(json, null, 2))
             }
             console.log("error:", err);
@@ -42,12 +43,14 @@ export class planManager {
     }
 
     private calculateDeltas() {
+        this.data.forEach(item => {
+            item.ledDelta = 0;
+        });
         let sData: IDataInfo = null;
         this.data.forEach(item => {
             if (sData !== null) {
                 const mStart: number = this.getMinTime(sData.time);
                 const mEnd: number = this.getMinTime(item.time);
-                item.ledDelta = 0; // init current data.
                 sData.ledDelta = (item.ledValue - sData.ledValue) / (mEnd - mStart);
                 sData = item;
             } else {
@@ -142,7 +145,7 @@ export class planManager {
         let ret: IValueInfo = null;
         if (curValue !== null) {
             ret = {
-                ledValue: curValue.ledValue + (this.getMinTime(curTime) - this.getMinTime(curValue.time)) * curValue.ledDelta,
+                ledValue: curValue.ledValue + (this.getMinTime(curTime) - this.getMinTime(curValue.time)) * (curValue.ledDelta || 0),
                 co2: curValue.co2
             }
         } else {

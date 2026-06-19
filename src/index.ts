@@ -151,9 +151,25 @@ async function main() {
         }
     }, () => Cat.ProgramConfig.systemUpdateInterval || 5000);
 
-    app.listen(PORT, () => {
+    const server = app.listen(PORT, () => {
         console.log(`Web Server running on http://localhost:${PORT}`);
     });
+
+    let shuttingDown = false;
+    async function shutdown(signal: string) {
+        if (shuttingDown) return;
+        shuttingDown = true;
+        console.log(`\nReceived ${signal}. Shutting down gracefully...`);
+        try {
+            await mainInst.close();
+        } catch (e) {
+            console.error("Error during graceful shutdown:", e);
+        }
+        process.exit(0);
+    }
+
+    process.on("SIGINT", () => shutdown("SIGINT"));
+    process.on("SIGTERM", () => shutdown("SIGTERM"));
 }
 
 main();
